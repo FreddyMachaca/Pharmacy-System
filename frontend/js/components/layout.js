@@ -34,7 +34,11 @@ function renderPageContent(pageId) {
             content.innerHTML = renderComingSoon('Gestión de Clientes', 'pi-users');
             break;
         case 'productos':
-            content.innerHTML = renderComingSoon('Gestión de Productos', 'pi-box');
+            if (typeof initProductos === 'function') {
+                initProductos();
+            } else {
+                content.innerHTML = renderComingSoon('Gestión de Productos', 'pi-box');
+            }
             break;
         case 'categorias':
             content.innerHTML = renderComingSoon('Categorías', 'pi-tags');

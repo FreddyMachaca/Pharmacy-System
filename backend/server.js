@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const { testConnection } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
+const productoRoutes = require('./routes/productoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/productos', productoRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({
