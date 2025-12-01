@@ -1,10 +1,14 @@
 const { pool } = require('../config/database');
 
 const CategoriaModel = {
-    async listarTodas(soloActivas = true) {
-        const where = soloActivas ? 'WHERE activo = 1' : '';
+    async listarTodas(incluirInactivas = false) {
+        const where = incluirInactivas ? '' : 'WHERE c.activo = 1';
         const [rows] = await pool.execute(`
-            SELECT * FROM categorias ${where} ORDER BY nombre ASC
+            SELECT c.*, 
+                   (SELECT COUNT(*) FROM productos WHERE categoria_id = c.id AND activo = 1) as total_productos
+            FROM categorias c 
+            ${where} 
+            ORDER BY c.nombre ASC
         `);
         return rows;
     },

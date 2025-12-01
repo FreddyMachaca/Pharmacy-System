@@ -168,7 +168,8 @@ const ProductoController = {
 
     async listarCategorias(req, res) {
         try {
-            const categorias = await CategoriaModel.listarTodas();
+            const incluirInactivas = req.query.inactivos === 'true';
+            const categorias = await CategoriaModel.listarTodas(incluirInactivas);
             res.json({ success: true, data: categorias });
         } catch (error) {
             console.error('Error al listar categorías:', error);
@@ -176,9 +177,47 @@ const ProductoController = {
         }
     },
 
+    async crearCategoria(req, res) {
+        try {
+            const { nombre } = req.body;
+            if (!nombre || nombre.trim() === '') {
+                return res.status(400).json({ success: false, mensaje: 'El nombre es requerido' });
+            }
+            const id = await CategoriaModel.crear(req.body);
+            res.status(201).json({ success: true, mensaje: 'Categoría creada correctamente', data: { id } });
+        } catch (error) {
+            console.error('Error al crear categoría:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al crear categoría' });
+        }
+    },
+
+    async actualizarCategoria(req, res) {
+        try {
+            const { id } = req.params;
+            await CategoriaModel.actualizar(id, req.body);
+            res.json({ success: true, mensaje: 'Categoría actualizada correctamente' });
+        } catch (error) {
+            console.error('Error al actualizar categoría:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al actualizar categoría' });
+        }
+    },
+
+    async cambiarEstadoCategoria(req, res) {
+        try {
+            const { id } = req.params;
+            const { activo } = req.body;
+            await CategoriaModel.cambiarEstado(id, activo);
+            res.json({ success: true, mensaje: activo ? 'Categoría activada' : 'Categoría desactivada' });
+        } catch (error) {
+            console.error('Error al cambiar estado:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al cambiar estado' });
+        }
+    },
+
     async listarLaboratorios(req, res) {
         try {
-            const laboratorios = await LaboratorioModel.listarTodos();
+            const incluirInactivos = req.query.inactivos === 'true';
+            const laboratorios = await LaboratorioModel.listarTodos(incluirInactivos);
             res.json({ success: true, data: laboratorios });
         } catch (error) {
             console.error('Error al listar laboratorios:', error);
@@ -186,10 +225,57 @@ const ProductoController = {
         }
     },
 
+    async crearLaboratorio(req, res) {
+        try {
+            const { nombre } = req.body;
+            if (!nombre || nombre.trim() === '') {
+                return res.status(400).json({ success: false, mensaje: 'El nombre es requerido' });
+            }
+            const id = await LaboratorioModel.crear(req.body);
+            res.status(201).json({ success: true, mensaje: 'Laboratorio creado correctamente', data: { id } });
+        } catch (error) {
+            console.error('Error al crear laboratorio:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al crear laboratorio' });
+        }
+    },
+
+    async actualizarLaboratorio(req, res) {
+        try {
+            const { id } = req.params;
+            await LaboratorioModel.actualizar(id, req.body);
+            res.json({ success: true, mensaje: 'Laboratorio actualizado correctamente' });
+        } catch (error) {
+            console.error('Error al actualizar laboratorio:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al actualizar laboratorio' });
+        }
+    },
+
+    async cambiarEstadoLaboratorio(req, res) {
+        try {
+            const { id } = req.params;
+            const { activo } = req.body;
+            await LaboratorioModel.cambiarEstado(id, activo);
+            res.json({ success: true, mensaje: activo ? 'Laboratorio activado' : 'Laboratorio desactivado' });
+        } catch (error) {
+            console.error('Error al cambiar estado:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al cambiar estado' });
+        }
+    },
+
     async listarLotes(req, res) {
         try {
             const { productoId } = req.params;
             const lotes = await LoteModel.listarPorProducto(productoId);
+            res.json({ success: true, data: lotes });
+        } catch (error) {
+            console.error('Error al listar lotes:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al obtener lotes' });
+        }
+    },
+
+    async listarTodosLotes(req, res) {
+        try {
+            const lotes = await LoteModel.listarTodos();
             res.json({ success: true, data: lotes });
         } catch (error) {
             console.error('Error al listar lotes:', error);
@@ -229,6 +315,17 @@ const ProductoController = {
         }
     },
 
+    async actualizarLote(req, res) {
+        try {
+            const { id } = req.params;
+            await LoteModel.actualizar(id, req.body);
+            res.json({ success: true, mensaje: 'Lote actualizado correctamente' });
+        } catch (error) {
+            console.error('Error al actualizar lote:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al actualizar lote' });
+        }
+    },
+
     async proximosAVencer(req, res) {
         try {
             const dias = parseInt(req.query.dias) || 90;
@@ -237,6 +334,66 @@ const ProductoController = {
         } catch (error) {
             console.error('Error al obtener próximos a vencer:', error);
             res.status(500).json({ success: false, mensaje: 'Error al obtener productos próximos a vencer' });
+        }
+    },
+
+    async listarMovimientos(req, res) {
+        try {
+            const movimientos = await ProductoModel.listarMovimientos();
+            res.json({ success: true, data: movimientos });
+        } catch (error) {
+            console.error('Error al listar movimientos:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al obtener movimientos' });
+        }
+    },
+
+    async crearMovimiento(req, res) {
+        try {
+            const { producto_id, tipo, cantidad, motivo } = req.body;
+
+            if (!producto_id || !tipo || !cantidad) {
+                return res.status(400).json({ 
+                    success: false, 
+                    mensaje: 'Producto, tipo y cantidad son requeridos' 
+                });
+            }
+
+            const producto = await ProductoModel.buscarPorId(producto_id);
+            if (!producto) {
+                return res.status(404).json({ success: false, mensaje: 'Producto no encontrado' });
+            }
+
+            if (tipo === 'salida' && producto.stock_actual < cantidad) {
+                return res.status(400).json({ 
+                    success: false, 
+                    mensaje: 'Stock insuficiente para esta salida' 
+                });
+            }
+
+            const stockAnterior = producto.stock_actual;
+            const operacion = tipo === 'entrada' ? 'add' : 'subtract';
+            await ProductoModel.actualizarStock(producto_id, cantidad, operacion);
+            
+            const productoActualizado = await ProductoModel.buscarPorId(producto_id);
+            const stockNuevo = productoActualizado.stock_actual;
+
+            await ProductoModel.registrarMovimiento({
+                producto_id,
+                tipo,
+                cantidad,
+                stock_anterior: stockAnterior,
+                stock_nuevo: stockNuevo,
+                motivo,
+                usuario_id: req.usuario.id
+            });
+
+            res.status(201).json({ 
+                success: true, 
+                mensaje: `${tipo === 'entrada' ? 'Entrada' : 'Salida'} registrada correctamente`
+            });
+        } catch (error) {
+            console.error('Error al crear movimiento:', error);
+            res.status(500).json({ success: false, mensaje: 'Error al registrar movimiento' });
         }
     }
 };

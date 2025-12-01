@@ -1,10 +1,14 @@
 const { pool } = require('../config/database');
 
 const LaboratorioModel = {
-    async listarTodos(soloActivos = true) {
-        const where = soloActivos ? 'WHERE activo = 1' : '';
+    async listarTodos(incluirInactivos = false) {
+        const where = incluirInactivos ? '' : 'WHERE l.activo = 1';
         const [rows] = await pool.execute(`
-            SELECT * FROM laboratorios ${where} ORDER BY nombre ASC
+            SELECT l.*, 
+                   (SELECT COUNT(*) FROM productos WHERE laboratorio_id = l.id AND activo = 1) as total_productos
+            FROM laboratorios l 
+            ${where} 
+            ORDER BY l.nombre ASC
         `);
         return rows;
     },
@@ -17,19 +21,19 @@ const LaboratorioModel = {
     },
 
     async crear(laboratorio) {
-        const { nombre, pais, contacto, telefono, correo } = laboratorio;
+        const { nombre, pais, direccion, telefono, email } = laboratorio;
         const [result] = await pool.execute(
-            'INSERT INTO laboratorios (nombre, pais, contacto, telefono, correo) VALUES (?, ?, ?, ?, ?)',
-            [nombre, pais || null, contacto || null, telefono || null, correo || null]
+            'INSERT INTO laboratorios (nombre, pais, direccion, telefono, email) VALUES (?, ?, ?, ?, ?)',
+            [nombre, pais || null, direccion || null, telefono || null, email || null]
         );
         return result.insertId;
     },
 
     async actualizar(id, laboratorio) {
-        const { nombre, pais, contacto, telefono, correo } = laboratorio;
+        const { nombre, pais, direccion, telefono, email } = laboratorio;
         await pool.execute(
-            'UPDATE laboratorios SET nombre = ?, pais = ?, contacto = ?, telefono = ?, correo = ? WHERE id = ?',
-            [nombre, pais || null, contacto || null, telefono || null, correo || null, id]
+            'UPDATE laboratorios SET nombre = ?, pais = ?, direccion = ?, telefono = ?, email = ? WHERE id = ?',
+            [nombre, pais || null, direccion || null, telefono || null, email || null, id]
         );
     },
 

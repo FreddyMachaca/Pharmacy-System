@@ -1,6 +1,17 @@
 const { pool } = require('../config/database');
 
 const LoteModel = {
+    async listarTodos() {
+        const [rows] = await pool.execute(`
+            SELECT l.*, p.nombre as producto_nombre
+            FROM lotes l
+            INNER JOIN productos p ON l.producto_id = p.id
+            WHERE l.activo = 1 AND p.activo = 1
+            ORDER BY l.fecha_vencimiento ASC
+        `);
+        return rows;
+    },
+
     async listarPorProducto(productoId) {
         const [rows] = await pool.execute(`
             SELECT * FROM lotes 
@@ -45,12 +56,11 @@ const LoteModel = {
     },
 
     async actualizar(id, lote) {
-        const { numero_lote, fecha_fabricacion, fecha_vencimiento, precio_compra } = lote;
+        const { fecha_vencimiento, cantidad_actual } = lote;
         await pool.execute(`
-            UPDATE lotes SET 
-                numero_lote = ?, fecha_fabricacion = ?, fecha_vencimiento = ?, precio_compra = ?
+            UPDATE lotes SET fecha_vencimiento = ?, cantidad_actual = ?
             WHERE id = ?
-        `, [numero_lote, fecha_fabricacion || null, fecha_vencimiento, precio_compra || null, id]);
+        `, [fecha_vencimiento, cantidad_actual, id]);
     },
 
     async actualizarCantidad(id, cantidad, operacion = 'set') {

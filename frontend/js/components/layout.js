@@ -41,16 +41,32 @@ function renderPageContent(pageId) {
             }
             break;
         case 'categorias':
-            content.innerHTML = renderComingSoon('Categorías', 'pi-tags');
+            if (typeof initCategorias === 'function') {
+                initCategorias();
+            } else {
+                content.innerHTML = renderComingSoon('Categorías', 'pi-tags');
+            }
             break;
         case 'laboratorios':
-            content.innerHTML = renderComingSoon('Laboratorios', 'pi-building');
+            if (typeof initLaboratorios === 'function') {
+                initLaboratorios();
+            } else {
+                content.innerHTML = renderComingSoon('Laboratorios', 'pi-building');
+            }
             break;
         case 'lotes':
-            content.innerHTML = renderComingSoon('Control de Lotes', 'pi-calendar');
+            if (typeof initLotes === 'function') {
+                initLotes();
+            } else {
+                content.innerHTML = renderComingSoon('Control de Lotes', 'pi-calendar');
+            }
             break;
         case 'movimientos':
-            content.innerHTML = renderComingSoon('Movimientos de Inventario', 'pi-arrows-h');
+            if (typeof initMovimientos === 'function') {
+                initMovimientos();
+            } else {
+                content.innerHTML = renderComingSoon('Movimientos de Inventario', 'pi-arrows-h');
+            }
             break;
         case 'nueva-compra':
             content.innerHTML = renderComingSoon('Nueva Compra', 'pi-plus-circle');

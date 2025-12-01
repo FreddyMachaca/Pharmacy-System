@@ -11,7 +11,7 @@ const menuItems = {
         { id: 'productos', label: 'Productos', icon: 'pi-box', roles: ['admin', 'inventario'] },
         { id: 'categorias', label: 'Categorías', icon: 'pi-tags', roles: ['admin', 'inventario'] },
         { id: 'laboratorios', label: 'Laboratorios', icon: 'pi-building', roles: ['admin', 'inventario'] },
-        { id: 'lotes', label: 'Lotes', icon: 'pi-calendar', roles: ['admin', 'inventario'], badge: 'Nuevo' },
+        { id: 'lotes', label: 'Lotes', icon: 'pi-calendar', roles: ['admin', 'inventario'] },
         { id: 'movimientos', label: 'Movimientos', icon: 'pi-arrows-h', roles: ['admin', 'inventario'] }
     ],
     compras: [

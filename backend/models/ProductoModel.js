@@ -149,6 +149,28 @@ const ProductoModel = {
         
         const [rows] = await pool.execute(query, params);
         return rows.length > 0;
+    },
+
+    async listarMovimientos() {
+        const [rows] = await pool.execute(`
+            SELECT m.*, p.nombre as producto_nombre, u.nombre as usuario_nombre
+            FROM movimientos_inventario m
+            INNER JOIN productos p ON m.producto_id = p.id
+            LEFT JOIN usuarios u ON m.usuario_id = u.id
+            ORDER BY m.created_at DESC
+            LIMIT 500
+        `);
+        return rows;
+    },
+
+    async registrarMovimiento(movimiento) {
+        const { producto_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo, usuario_id } = movimiento;
+        const [result] = await pool.execute(`
+            INSERT INTO movimientos_inventario 
+            (producto_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo, usuario_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [producto_id, tipo, cantidad, stock_anterior, stock_nuevo, motivo || null, usuario_id]);
+        return result.insertId;
     }
 };
 

@@ -767,3 +767,7 @@ window.abrirModalLote = abrirModalLote;
 window.guardarLote = guardarLote;
 window.cerrarModal = cerrarModal;
 window.cerrarModalSiClickFuera = cerrarModalSiClickFuera;
+window.escapeHtml = escapeHtml;
+window.mostrarNotificacion = mostrarNotificacion;
+window.formatNumber = formatNumber;
+window.formatDate = formatDate;
