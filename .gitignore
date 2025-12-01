@@ -1,0 +1,57 @@
+# Dependencias
+node_modules/
+package-lock.json
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+
+# Base de datos local (para desarrollo)
+data/
+mysql_data/
+
+# Backups generados
+backups/*.zip
+
+# Archivos de build
+dist/
+build/
+
+# MariaDB y Node.js portables (se descargan por separado)
+system/mariadb/
+system/nodejs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+venv/
+.venv/
+
+# Instalador generado
+*.exe
+!SistemaFarmacia.exe

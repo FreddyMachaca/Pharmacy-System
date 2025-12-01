@@ -1,0 +1,26 @@
+{
+  "name": "pharmacy-system-backend",
+  "version": "1.0.0",
+  "description": "Pharmacy System - Backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "farmacia",
+    "pharmacy",
+    "pos",
+    "inventario"
+  ],
+  "author": "Pharmacy System",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.5"
+  }
+}
