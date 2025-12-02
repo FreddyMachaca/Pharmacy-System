@@ -578,6 +578,51 @@ textarea.form-control {
     color: #6c757d;
 }
 
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid #dee2e6;
+    background: var(--blanco-puro);
+    color: #495057;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: var(--borde-radius-sm);
+    cursor: pointer;
+    transition: all var(--transicion-rapida);
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--azul-primario);
+    border-color: var(--azul-primario);
+    color: var(--blanco-puro);
+}
+
+.pagination-btn.active {
+    background: var(--azul-primario);
+    border-color: var(--azul-primario);
+    color: var(--blanco-puro);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-dots {
+    padding: 0 8px;
+    color: #6c757d;
+}
+
 .pagination-buttons {
     display: flex;
     gap: 8px;

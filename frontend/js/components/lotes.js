@@ -2,6 +2,8 @@ let lotesData = [];
 let lotesFiltrados = [];
 let productosParaLotes = [];
 let filtroVencimiento = 'todos';
+let paginaActualLotes = 1;
+const itemsPorPaginaLotes = 10;
 
 async function initLotes() {
     await cargarDatosLotes();
@@ -159,6 +161,7 @@ function renderLotesPage() {
                         <p>No se encontraron lotes con los filtros actuales</p>
                     </div>
                 ` : ''}
+                ${renderPaginacionLotes()}
             </div>
         </div>
         <div id="modalContainer"></div>
@@ -169,8 +172,11 @@ function renderLotesRows() {
     if (lotesFiltrados.length === 0) return '';
     
     const hoy = new Date();
+    const inicio = (paginaActualLotes - 1) * itemsPorPaginaLotes;
+    const fin = inicio + itemsPorPaginaLotes;
+    const lotesPaginados = lotesFiltrados.slice(inicio, fin);
     
-    return lotesFiltrados.map(l => {
+    return lotesPaginados.map(l => {
         const venc = new Date(l.fecha_vencimiento);
         const dias = Math.ceil((venc - hoy) / (1000 * 60 * 60 * 24));
         
@@ -251,11 +257,59 @@ function filtrarLotes() {
         });
     }
     
+    paginaActualLotes = 1;
     document.getElementById('lotesTableBody').innerHTML = renderLotesRows();
+    const paginacionEl = document.querySelector('.table-pagination');
+    if (paginacionEl) paginacionEl.outerHTML = renderPaginacionLotes();
+}
+
+function renderPaginacionLotes() {
+    const totalPaginas = Math.ceil(lotesFiltrados.length / itemsPorPaginaLotes);
+    const inicio = (paginaActualLotes - 1) * itemsPorPaginaLotes + 1;
+    const fin = Math.min(paginaActualLotes * itemsPorPaginaLotes, lotesFiltrados.length);
+    
+    if (lotesFiltrados.length === 0) {
+        return '';
+    }
+    
+    let paginas = '';
+    for (let i = 1; i <= totalPaginas; i++) {
+        if (i === 1 || i === totalPaginas || (i >= paginaActualLotes - 1 && i <= paginaActualLotes + 1)) {
+            paginas += `<button class="pagination-btn ${i === paginaActualLotes ? 'active' : ''}" onclick="cambiarPaginaLotes(${i})">${i}</button>`;
+        } else if (i === paginaActualLotes - 2 || i === paginaActualLotes + 2) {
+            paginas += `<span class="pagination-dots">...</span>`;
+        }
+    }
+    
+    return `
+        <div class="table-pagination">
+            <div class="pagination-info">
+                Mostrando ${inicio}-${fin} de ${lotesFiltrados.length} lotes
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" onclick="cambiarPaginaLotes(${paginaActualLotes - 1})" ${paginaActualLotes === 1 ? 'disabled' : ''}>
+                    <i class="pi pi-angle-left"></i>
+                </button>
+                ${paginas}
+                <button class="pagination-btn" onclick="cambiarPaginaLotes(${paginaActualLotes + 1})" ${paginaActualLotes === totalPaginas ? 'disabled' : ''}>
+                    <i class="pi pi-angle-right"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function cambiarPaginaLotes(pagina) {
+    const totalPaginas = Math.ceil(lotesFiltrados.length / itemsPorPaginaLotes);
+    if (pagina < 1 || pagina > totalPaginas) return;
+    paginaActualLotes = pagina;
+    document.getElementById('lotesTableBody').innerHTML = renderLotesRows();
+    document.querySelector('.table-pagination').outerHTML = renderPaginacionLotes();
 }
 
 function setFiltroVencimiento(filtro) {
     filtroVencimiento = filtro;
+    paginaActualLotes = 1;
     aplicarFiltrosLotes();
     renderLotesPage();
 }
@@ -449,3 +503,4 @@ window.guardarNuevoLote = guardarNuevoLote;
 window.editarLote = editarLote;
 window.actualizarLote = actualizarLote;
 window.cerrarModalLotes = cerrarModalLotes;
+window.cambiarPaginaLotes = cambiarPaginaLotes;

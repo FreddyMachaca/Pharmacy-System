@@ -4,6 +4,8 @@ let laboratoriosData = [];
 let productosFiltrados = [];
 let mostrarInactivos = false;
 let productoEditando = null;
+let paginaActualProductos = 1;
+const itemsPorPaginaProductos = 10;
 
 async function initProductos() {
     await cargarDatosIniciales();
@@ -133,7 +135,11 @@ function renderProductosPage() {
 function renderProductosRows() {
     if (productosFiltrados.length === 0) return '';
     
-    return productosFiltrados.map(p => {
+    const inicio = (paginaActualProductos - 1) * itemsPorPaginaProductos;
+    const fin = inicio + itemsPorPaginaProductos;
+    const productosPaginados = productosFiltrados.slice(inicio, fin);
+    
+    return productosPaginados.map(p => {
         const stockClass = p.stock_actual === 0 ? 'stock-sin' : 
                           p.stock_actual <= p.stock_minimo ? 'stock-bajo' : 'stock-ok';
         const stockBadge = p.stock_actual === 0 ? 'badge-danger' : 
@@ -194,13 +200,47 @@ function renderEmptyState() {
 }
 
 function renderPaginacion() {
+    const totalPaginas = Math.ceil(productosFiltrados.length / itemsPorPaginaProductos);
+    const inicio = (paginaActualProductos - 1) * itemsPorPaginaProductos + 1;
+    const fin = Math.min(paginaActualProductos * itemsPorPaginaProductos, productosFiltrados.length);
+    
+    if (productosFiltrados.length === 0) {
+        return '';
+    }
+    
+    let paginas = '';
+    for (let i = 1; i <= totalPaginas; i++) {
+        if (i === 1 || i === totalPaginas || (i >= paginaActualProductos - 1 && i <= paginaActualProductos + 1)) {
+            paginas += `<button class="pagination-btn ${i === paginaActualProductos ? 'active' : ''}" onclick="cambiarPaginaProductos(${i})">${i}</button>`;
+        } else if (i === paginaActualProductos - 2 || i === paginaActualProductos + 2) {
+            paginas += `<span class="pagination-dots">...</span>`;
+        }
+    }
+    
     return `
         <div class="table-pagination">
             <div class="pagination-info">
-                Mostrando ${productosFiltrados.length} de ${productosData.length} productos
+                Mostrando ${inicio}-${fin} de ${productosFiltrados.length} productos
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" onclick="cambiarPaginaProductos(${paginaActualProductos - 1})" ${paginaActualProductos === 1 ? 'disabled' : ''}>
+                    <i class="pi pi-angle-left"></i>
+                </button>
+                ${paginas}
+                <button class="pagination-btn" onclick="cambiarPaginaProductos(${paginaActualProductos + 1})" ${paginaActualProductos === totalPaginas ? 'disabled' : ''}>
+                    <i class="pi pi-angle-right"></i>
+                </button>
             </div>
         </div>
     `;
+}
+
+function cambiarPaginaProductos(pagina) {
+    const totalPaginas = Math.ceil(productosFiltrados.length / itemsPorPaginaProductos);
+    if (pagina < 1 || pagina > totalPaginas) return;
+    paginaActualProductos = pagina;
+    document.getElementById('productosTableBody').innerHTML = renderProductosRows();
+    document.querySelector('.table-pagination').outerHTML = renderPaginacion();
 }
 
 function calcularEstadisticas() {
@@ -225,7 +265,9 @@ function filtrarProductos() {
         return coincide;
     });
     
+    paginaActualProductos = 1;
     document.getElementById('productosTableBody').innerHTML = renderProductosRows();
+    document.querySelector('.table-pagination').outerHTML = renderPaginacion();
 }
 
 async function toggleInactivos(checked) {
@@ -771,3 +813,4 @@ window.escapeHtml = escapeHtml;
 window.mostrarNotificacion = mostrarNotificacion;
 window.formatNumber = formatNumber;
 window.formatDate = formatDate;
+window.cambiarPaginaProductos = cambiarPaginaProductos;

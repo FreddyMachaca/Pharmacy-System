@@ -2,6 +2,8 @@ let movimientosData = [];
 let movimientosFiltrados = [];
 let productosParaMovimientos = [];
 let filtroTipoMovimiento = 'todos';
+let paginaActualMovimientos = 1;
+const itemsPorPaginaMovimientos = 15;
 
 async function initMovimientos() {
     await cargarDatosMovimientos();
@@ -136,6 +138,7 @@ function renderMovimientosPage() {
                         <p>No se encontraron movimientos con los filtros actuales</p>
                     </div>
                 ` : ''}
+                ${renderPaginacionMovimientos()}
             </div>
         </div>
         <div id="modalContainer"></div>
@@ -145,7 +148,11 @@ function renderMovimientosPage() {
 function renderMovimientosRows() {
     if (movimientosFiltrados.length === 0) return '';
     
-    return movimientosFiltrados.map(m => {
+    const inicio = (paginaActualMovimientos - 1) * itemsPorPaginaMovimientos;
+    const fin = inicio + itemsPorPaginaMovimientos;
+    const movimientosPaginados = movimientosFiltrados.slice(inicio, fin);
+    
+    return movimientosPaginados.map(m => {
         let tipoBadge = 'badge-info';
         let tipoIcon = 'pi-sync';
         let tipoText = 'Ajuste';
@@ -210,11 +217,59 @@ function filtrarMovimientos() {
         });
     }
     
+    paginaActualMovimientos = 1;
     document.getElementById('movimientosTableBody').innerHTML = renderMovimientosRows();
+    const paginacionEl = document.querySelector('.table-pagination');
+    if (paginacionEl) paginacionEl.outerHTML = renderPaginacionMovimientos();
+}
+
+function renderPaginacionMovimientos() {
+    const totalPaginas = Math.ceil(movimientosFiltrados.length / itemsPorPaginaMovimientos);
+    const inicio = (paginaActualMovimientos - 1) * itemsPorPaginaMovimientos + 1;
+    const fin = Math.min(paginaActualMovimientos * itemsPorPaginaMovimientos, movimientosFiltrados.length);
+    
+    if (movimientosFiltrados.length === 0) {
+        return '';
+    }
+    
+    let paginas = '';
+    for (let i = 1; i <= totalPaginas; i++) {
+        if (i === 1 || i === totalPaginas || (i >= paginaActualMovimientos - 1 && i <= paginaActualMovimientos + 1)) {
+            paginas += `<button class="pagination-btn ${i === paginaActualMovimientos ? 'active' : ''}" onclick="cambiarPaginaMovimientos(${i})">${i}</button>`;
+        } else if (i === paginaActualMovimientos - 2 || i === paginaActualMovimientos + 2) {
+            paginas += `<span class="pagination-dots">...</span>`;
+        }
+    }
+    
+    return `
+        <div class="table-pagination">
+            <div class="pagination-info">
+                Mostrando ${inicio}-${fin} de ${movimientosFiltrados.length} movimientos
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" onclick="cambiarPaginaMovimientos(${paginaActualMovimientos - 1})" ${paginaActualMovimientos === 1 ? 'disabled' : ''}>
+                    <i class="pi pi-angle-left"></i>
+                </button>
+                ${paginas}
+                <button class="pagination-btn" onclick="cambiarPaginaMovimientos(${paginaActualMovimientos + 1})" ${paginaActualMovimientos === totalPaginas ? 'disabled' : ''}>
+                    <i class="pi pi-angle-right"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function cambiarPaginaMovimientos(pagina) {
+    const totalPaginas = Math.ceil(movimientosFiltrados.length / itemsPorPaginaMovimientos);
+    if (pagina < 1 || pagina > totalPaginas) return;
+    paginaActualMovimientos = pagina;
+    document.getElementById('movimientosTableBody').innerHTML = renderMovimientosRows();
+    document.querySelector('.table-pagination').outerHTML = renderPaginacionMovimientos();
 }
 
 function setFiltroTipoMovimiento(filtro) {
     filtroTipoMovimiento = filtro;
+    paginaActualMovimientos = 1;
     aplicarFiltrosMovimientos();
     renderMovimientosPage();
 }
@@ -389,3 +444,4 @@ window.mostrarStockActual = mostrarStockActual;
 window.toggleMotivoOtro = toggleMotivoOtro;
 window.guardarMovimiento = guardarMovimiento;
 window.cerrarModalMovimientos = cerrarModalMovimientos;
+window.cambiarPaginaMovimientos = cambiarPaginaMovimientos;
