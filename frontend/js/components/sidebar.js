@@ -14,11 +14,6 @@ const menuItems = {
         { id: 'lotes', label: 'Lotes', icon: 'pi-calendar', roles: ['admin', 'inventario'] },
         { id: 'movimientos', label: 'Movimientos', icon: 'pi-arrows-h', roles: ['admin', 'inventario'] }
     ],
-    compras: [
-        { id: 'nueva-compra', label: 'Nueva Compra', icon: 'pi-plus-circle', roles: ['admin', 'inventario'] },
-        { id: 'compras', label: 'Historial Compras', icon: 'pi-file', roles: ['admin', 'inventario'] },
-        { id: 'proveedores', label: 'Proveedores', icon: 'pi-truck', roles: ['admin', 'inventario'] }
-    ],
     reportes: [
         { id: 'reporte-ventas', label: 'Reporte Ventas', icon: 'pi-chart-bar', roles: ['admin'] },
         { id: 'reporte-inventario', label: 'Reporte Inventario', icon: 'pi-chart-pie', roles: ['admin', 'inventario'] },
@@ -50,7 +45,6 @@ function renderSidebar() {
                 ${renderMenuSection('Principal', menuItems.principal, userRole)}
                 ${renderMenuSection('Ventas', menuItems.ventas, userRole)}
                 ${renderMenuSection('Inventario', menuItems.inventario, userRole)}
-                ${renderMenuSection('Compras', menuItems.compras, userRole)}
                 ${renderMenuSection('Reportes', menuItems.reportes, userRole)}
                 ${renderMenuSection('Sistema', menuItems.sistema, userRole)}
             </nav>
