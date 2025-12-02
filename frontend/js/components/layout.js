@@ -38,13 +38,25 @@ function renderPageContent(pageId) {
             content.innerHTML = renderDashboard();
             break;
         case 'punto-venta':
-            content.innerHTML = renderComingSoon('Punto de Venta', 'pi-shopping-cart');
+            if (typeof initPuntoVenta === 'function') {
+                initPuntoVenta();
+            } else {
+                content.innerHTML = renderComingSoon('Punto de Venta', 'pi-shopping-cart');
+            }
             break;
         case 'ventas':
-            content.innerHTML = renderComingSoon('Historial de Ventas', 'pi-list');
+            if (typeof initHistorialVentas === 'function') {
+                initHistorialVentas();
+            } else {
+                content.innerHTML = renderComingSoon('Historial de Ventas', 'pi-list');
+            }
             break;
         case 'clientes':
-            content.innerHTML = renderComingSoon('Gestión de Clientes', 'pi-users');
+            if (typeof initClientes === 'function') {
+                initClientes();
+            } else {
+                content.innerHTML = renderComingSoon('Gestión de Clientes', 'pi-users');
+            }
             break;
         case 'productos':
             if (typeof initProductos === 'function') {
