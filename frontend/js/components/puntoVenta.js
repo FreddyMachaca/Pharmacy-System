@@ -482,11 +482,12 @@ function mostrarTicketVenta(venta) {
                     <h2 class="modal-title"><i class="pi pi-check-circle"></i> Venta Exitosa</h2>
                 </div>
                 <div class="modal-body">
-                    <div class="ticket-preview">
+                    <div class="ticket-preview" id="ticketParaImprimir">
                         <div class="ticket-header">
                             <h3>FARMACIA</h3>
                             <p>Venta #${venta.numero_venta}</p>
                             <p>${formatFechaBolivia(venta.fecha_venta)}</p>
+                            ${venta.cliente_nombre ? `<p>Cliente: ${venta.cliente_nombre} ${venta.cliente_apellido || ''}</p>` : ''}
                         </div>
                         <div class="ticket-items">
                             ${venta.detalles.map(d => `
@@ -512,7 +513,7 @@ function mostrarTicketVenta(venta) {
                     <button class="btn btn-secondary" onclick="cerrarModalPOS(); renderPuntoVentaPage();">
                         <i class="pi pi-arrow-left"></i> Nueva Venta
                     </button>
-                    <button class="btn btn-primary" onclick="window.print()">
+                    <button class="btn btn-primary" onclick="imprimirTicket()">
                         <i class="pi pi-print"></i> Imprimir
                     </button>
                 </div>
@@ -525,6 +526,56 @@ function mostrarTicketVenta(venta) {
 function cerrarModalPOS(e = null, clickFuera = false) {
     if (clickFuera && e && !e.target.classList.contains('modal-overlay')) return;
     document.getElementById('modalContainer').innerHTML = '';
+}
+
+function imprimirTicket() {
+    const ticket = document.getElementById('ticketParaImprimir');
+    const contenido = ticket.innerHTML;
+    
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:absolute;width:0;height:0;border:0;';
+    document.body.appendChild(iframe);
+    
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+        <html>
+        <head>
+            <title>Ticket</title>
+            <style>
+                @page { 
+                    size: 80mm auto; 
+                    margin: 0; 
+                }
+                @media print {
+                    html, body { 
+                        margin: 0; 
+                        padding: 5mm;
+                    }
+                }
+                body { font-family: 'Courier New', monospace; font-size: 12px; padding: 10px; margin: 0; width: 80mm; }
+                .ticket-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+                .ticket-header h3 { margin: 0 0 5px 0; font-size: 16px; }
+                .ticket-header p { margin: 2px 0; }
+                .ticket-item { display: flex; justify-content: space-between; margin: 5px 0; }
+                .ticket-items { border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+                .ticket-row { display: flex; justify-content: space-between; margin: 3px 0; }
+                .ticket-row.total { font-weight: bold; font-size: 14px; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
+                .ticket-footer { text-align: center; margin-top: 15px; border-top: 1px dashed #000; padding-top: 10px; }
+                .ticket-totals { margin-top: 10px; }
+            </style>
+        </head>
+        <body>${contenido}</body>
+        </html>
+    `);
+    doc.close();
+    
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    
+    setTimeout(() => {
+        document.body.removeChild(iframe);
+    }, 1000);
 }
 
 function atajosTecladoPOS(e) {
@@ -551,3 +602,4 @@ window.toggleMontoPago = toggleMontoPago;
 window.actualizarTotales = actualizarTotales;
 window.calcularCambio = calcularCambio;
 window.cerrarModalPOS = cerrarModalPOS;
+window.imprimirTicket = imprimirTicket;

@@ -225,6 +225,31 @@ async function verDetalleVenta(id) {
                                 </span>
                             </div>
                         </div>
+                        <div id="ticketHistorial" style="display:none;">
+                            <div class="ticket-header">
+                                <h3>FARMACIA</h3>
+                                <p>Venta #${venta.numero_venta}</p>
+                                <p>${formatDateTimeVentas(venta.fecha_venta)}</p>
+                                ${venta.cliente_nombre ? `<p>Cliente: ${venta.cliente_nombre} ${venta.cliente_apellido || ''}</p>` : ''}
+                            </div>
+                            <div class="ticket-items">
+                                ${venta.detalles.map(d => `
+                                    <div class="ticket-item">
+                                        <span>${d.cantidad}x ${d.producto_nombre}</span>
+                                        <span>Bs. ${formatNumber(d.subtotal)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="ticket-totals">
+                                <div class="ticket-row"><span>Subtotal:</span><span>Bs. ${formatNumber(venta.subtotal)}</span></div>
+                                ${venta.descuento > 0 ? `<div class="ticket-row"><span>Descuento:</span><span>-Bs. ${formatNumber(venta.descuento)}</span></div>` : ''}
+                                <div class="ticket-row total"><span>TOTAL:</span><span>Bs. ${formatNumber(venta.total)}</span></div>
+                                <div class="ticket-row"><span>Método:</span><span>${venta.metodo_pago}</span></div>
+                            </div>
+                            <div class="ticket-footer">
+                                <p>¡Gracias por su compra!</p>
+                            </div>
+                        </div>
                         <table class="productos-table">
                             <thead>
                                 <tr>
@@ -254,7 +279,7 @@ async function verDetalleVenta(id) {
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" onclick="cerrarModalVentas()">Cerrar</button>
-                        <button class="btn btn-primary" onclick="window.print()">
+                        <button class="btn btn-primary" onclick="imprimirTicketHistorial()">
                             <i class="pi pi-print"></i> Imprimir
                         </button>
                     </div>
@@ -332,6 +357,56 @@ function cerrarModalVentas(e = null, clickFuera = false) {
     document.getElementById('modalContainer').innerHTML = '';
 }
 
+function imprimirTicketHistorial() {
+    const ticket = document.getElementById('ticketHistorial');
+    const contenido = ticket.innerHTML;
+    
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:absolute;width:0;height:0;border:0;';
+    document.body.appendChild(iframe);
+    
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`
+        <html>
+        <head>
+            <title>Ticket</title>
+            <style>
+                @page { 
+                    size: 80mm auto; 
+                    margin: 0; 
+                }
+                @media print {
+                    html, body { 
+                        margin: 0; 
+                        padding: 5mm;
+                    }
+                }
+                body { font-family: 'Courier New', monospace; font-size: 12px; padding: 10px; margin: 0; width: 80mm; }
+                .ticket-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+                .ticket-header h3 { margin: 0 0 5px 0; font-size: 16px; }
+                .ticket-header p { margin: 2px 0; }
+                .ticket-item { display: flex; justify-content: space-between; margin: 5px 0; }
+                .ticket-items { border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+                .ticket-row { display: flex; justify-content: space-between; margin: 3px 0; }
+                .ticket-row.total { font-weight: bold; font-size: 14px; border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
+                .ticket-footer { text-align: center; margin-top: 15px; border-top: 1px dashed #000; padding-top: 10px; }
+                .ticket-totals { margin-top: 10px; }
+            </style>
+        </head>
+        <body>${contenido}</body>
+        </html>
+    `);
+    doc.close();
+    
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+    
+    setTimeout(() => {
+        document.body.removeChild(iframe);
+    }, 1000);
+}
+
 function formatDateTimeVentas(dateStr) {
     if (!dateStr) return '-';
     const formatter = new Intl.DateTimeFormat('es-BO', {
@@ -353,3 +428,4 @@ window.verDetalleVenta = verDetalleVenta;
 window.anularVenta = anularVenta;
 window.cambiarPaginaVentas = cambiarPaginaVentas;
 window.cerrarModalVentas = cerrarModalVentas;
+window.imprimirTicketHistorial = imprimirTicketHistorial;
