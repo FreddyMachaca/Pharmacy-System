@@ -7,18 +7,31 @@ function renderMainLayout() {
         <div class="main-wrapper">
             ${renderTopbar()}
             <main class="main-content" id="pageContent">
-                ${renderDashboard()}
             </main>
         </div>
     `;
     
-    window.currentPage = 'dashboard';
     initSidebarEvents();
     initTopbarEvents();
+    
+    const savedPage = localStorage.getItem('pharmacy_current_page') || 'dashboard';
+    window.currentPage = savedPage;
+    renderPageContent(savedPage);
+    
+    const menuItems = document.querySelectorAll('.sidebar-menu li[data-page]');
+    menuItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.page === savedPage) {
+            item.classList.add('active');
+        }
+    });
 }
 
 function renderPageContent(pageId) {
     const content = document.getElementById('pageContent');
+    
+    window.currentPage = pageId;
+    localStorage.setItem('pharmacy_current_page', pageId);
     
     switch (pageId) {
         case 'dashboard':
