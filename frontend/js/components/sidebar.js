@@ -1,35 +1,42 @@
 const menuItems = {
     principal: [
-        { id: 'dashboard', label: 'Dashboard', icon: 'pi-home', roles: ['admin', 'cajero', 'inventario'] }
+        { id: 'dashboard', label: 'Dashboard', icon: 'pi-home' }
     ],
     ventas: [
-        { id: 'punto-venta', label: 'Punto de Venta', icon: 'pi-shopping-cart', roles: ['admin', 'cajero'] },
-        { id: 'ventas', label: 'Historial Ventas', icon: 'pi-list', roles: ['admin', 'cajero'] },
-        { id: 'clientes', label: 'Clientes', icon: 'pi-users', roles: ['admin', 'cajero'] }
+        { id: 'punto-venta', label: 'Punto de Venta', icon: 'pi-shopping-cart' },
+        { id: 'ventas', label: 'Historial Ventas', icon: 'pi-list' },
+        { id: 'clientes', label: 'Clientes', icon: 'pi-users' }
     ],
     inventario: [
-        { id: 'productos', label: 'Productos', icon: 'pi-box', roles: ['admin', 'inventario'] },
-        { id: 'categorias', label: 'Categorías', icon: 'pi-tags', roles: ['admin', 'inventario'] },
-        { id: 'laboratorios', label: 'Laboratorios', icon: 'pi-building', roles: ['admin', 'inventario'] },
-        { id: 'lotes', label: 'Lotes', icon: 'pi-calendar', roles: ['admin', 'inventario'] },
-        { id: 'movimientos', label: 'Movimientos', icon: 'pi-arrows-h', roles: ['admin', 'inventario'] }
+        { id: 'productos', label: 'Productos', icon: 'pi-box' },
+        { id: 'categorias', label: 'Categorías', icon: 'pi-tags' },
+        { id: 'laboratorios', label: 'Laboratorios', icon: 'pi-building' },
+        { id: 'lotes', label: 'Lotes', icon: 'pi-calendar' },
+        { id: 'movimientos', label: 'Movimientos', icon: 'pi-arrows-h' }
     ],
     reportes: [
-        { id: 'reporte-ventas', label: 'Reporte Ventas', icon: 'pi-chart-bar', roles: ['admin'] },
-        { id: 'reporte-inventario', label: 'Reporte Inventario', icon: 'pi-chart-pie', roles: ['admin', 'inventario'] },
-        { id: 'reporte-vencimientos', label: 'Próximos a Vencer', icon: 'pi-exclamation-triangle', roles: ['admin', 'inventario'] },
-        { id: 'reportes-profesionales', label: 'Reportes Exportables', icon: 'pi-file-pdf', roles: ['admin'] }
+        { id: 'reporte-ventas', label: 'Reporte Ventas', icon: 'pi-chart-bar' },
+        { id: 'reporte-inventario', label: 'Reporte Inventario', icon: 'pi-chart-pie' },
+        { id: 'reporte-vencimientos', label: 'Próximos a Vencer', icon: 'pi-exclamation-triangle' },
+        { id: 'reportes-profesionales', label: 'Reportes Exportables', icon: 'pi-file-pdf' }
     ],
     sistema: [
-        { id: 'usuarios', label: 'Usuarios', icon: 'pi-user-edit', roles: ['admin'] },
-        { id: 'caja', label: 'Caja', icon: 'pi-wallet', roles: ['admin', 'cajero'] },
-        { id: 'configuracion', label: 'Configuración', icon: 'pi-cog', roles: ['admin'] }
+        { id: 'usuarios', label: 'Usuarios', icon: 'pi-user-edit' },
+        { id: 'caja', label: 'Caja', icon: 'pi-wallet' },
+        { id: 'configuracion', label: 'Configuración', icon: 'pi-cog' }
     ]
 };
 
+function tieneAccesoModulo(moduloId) {
+    const user = auth.getUser();
+    if (!user) return false;
+    if (user.rol === 'admin') return true;
+    return auth.puedeAccederModulo(moduloId);
+}
+
 function renderSidebar() {
     const user = auth.getUser();
-    const userRole = user?.rol || 'admin';
+    const userRole = user?.rol || '';
     
     return `
         <aside class="sidebar" id="sidebar">
@@ -43,11 +50,11 @@ function renderSidebar() {
             </div>
             
             <nav class="sidebar-menu">
-                ${renderMenuSection('Principal', menuItems.principal, userRole)}
-                ${renderMenuSection('Ventas', menuItems.ventas, userRole)}
-                ${renderMenuSection('Inventario', menuItems.inventario, userRole)}
-                ${renderMenuSection('Reportes', menuItems.reportes, userRole)}
-                ${renderMenuSection('Sistema', menuItems.sistema, userRole)}
+                ${renderMenuSection('Principal', menuItems.principal)}
+                ${renderMenuSection('Ventas', menuItems.ventas)}
+                ${renderMenuSection('Inventario', menuItems.inventario)}
+                ${renderMenuSection('Reportes', menuItems.reportes)}
+                ${renderMenuSection('Sistema', menuItems.sistema)}
             </nav>
             
             <div class="sidebar-footer">
@@ -63,8 +70,8 @@ function renderSidebar() {
     `;
 }
 
-function renderMenuSection(title, items, userRole) {
-    const visibleItems = items.filter(item => item.roles.includes(userRole));
+function renderMenuSection(title, items) {
+    const visibleItems = items.filter(item => tieneAccesoModulo(item.id));
     
     if (visibleItems.length === 0) return '';
     

@@ -19,9 +19,39 @@ CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE,
     descripcion VARCHAR(255),
+    es_sistema TINYINT(1) DEFAULT 0,
     activo TINYINT(1) DEFAULT 1,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- TABLA: modulos
+-- =====================================================
+CREATE TABLE IF NOT EXISTS modulos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(50) NOT NULL UNIQUE,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(255),
+    icono VARCHAR(50),
+    orden INT DEFAULT 0,
+    activo TINYINT(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- TABLA: permisos_rol
+-- =====================================================
+CREATE TABLE IF NOT EXISTS permisos_rol (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rol_id INT NOT NULL,
+    modulo_id INT NOT NULL,
+    puede_ver TINYINT(1) DEFAULT 0,
+    puede_crear TINYINT(1) DEFAULT 0,
+    puede_editar TINYINT(1) DEFAULT 0,
+    puede_eliminar TINYINT(1) DEFAULT 0,
+    UNIQUE KEY unique_rol_modulo (rol_id, modulo_id),
+    FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (modulo_id) REFERENCES modulos(id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -37,6 +67,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     rol_id INT NOT NULL,
     activo TINYINT(1) DEFAULT 1,
     ultimo_acceso DATETIME,
+    token_version INT DEFAULT 0,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -280,10 +311,38 @@ CREATE TABLE IF NOT EXISTS configuracion (
 -- DATOS INICIALES
 -- =====================================================
 
-INSERT INTO roles (nombre, descripcion) VALUES
-('admin', 'Administrador con acceso total al sistema'),
-('cajero', 'Acceso a punto de venta y consulta de productos'),
-('inventario', 'Gestión de inventario, compras y proveedores');
+INSERT INTO roles (nombre, descripcion, es_sistema) VALUES
+('admin', 'Administrador con acceso total al sistema', 1),
+('cajero', 'Acceso a punto de venta y consulta de productos', 1);
+
+INSERT INTO modulos (codigo, nombre, descripcion, icono, orden) VALUES
+('dashboard', 'Dashboard', 'Panel principal', 'pi-home', 1),
+('punto-venta', 'Punto de Venta', 'Realizar ventas', 'pi-shopping-cart', 2),
+('ventas', 'Historial Ventas', 'Ver historial de ventas', 'pi-list', 3),
+('clientes', 'Clientes', 'Gestión de clientes', 'pi-users', 4),
+('productos', 'Productos', 'Gestión de productos', 'pi-box', 5),
+('categorias', 'Categorías', 'Gestión de categorías', 'pi-tags', 6),
+('laboratorios', 'Laboratorios', 'Gestión de laboratorios', 'pi-building', 7),
+('lotes', 'Lotes', 'Gestión de lotes', 'pi-calendar', 8),
+('movimientos', 'Movimientos', 'Movimientos de inventario', 'pi-arrows-h', 9),
+('reporte-ventas', 'Reporte Ventas', 'Reportes de ventas', 'pi-chart-bar', 10),
+('reporte-inventario', 'Reporte Inventario', 'Reportes de inventario', 'pi-chart-pie', 11),
+('reporte-vencimientos', 'Próximos a Vencer', 'Productos por vencer', 'pi-exclamation-triangle', 12),
+('reportes-profesionales', 'Reportes Exportables', 'Exportar reportes PDF/Excel', 'pi-file-pdf', 13),
+('usuarios', 'Usuarios', 'Gestión de usuarios y roles', 'pi-user-edit', 14),
+('caja', 'Caja', 'Control de caja', 'pi-wallet', 15),
+('configuracion', 'Configuración', 'Configuración del sistema', 'pi-cog', 16);
+
+INSERT INTO permisos_rol (rol_id, modulo_id, puede_ver, puede_crear, puede_editar, puede_eliminar)
+SELECT 1, id, 1, 1, 1, 1 FROM modulos;
+
+INSERT INTO permisos_rol (rol_id, modulo_id, puede_ver, puede_crear, puede_editar, puede_eliminar) VALUES
+(2, 1, 1, 0, 0, 0),
+(2, 2, 1, 1, 0, 0),
+(2, 3, 1, 0, 0, 0),
+(2, 4, 1, 1, 1, 0),
+(2, 5, 1, 0, 0, 0),
+(2, 15, 1, 1, 0, 0);
 
 INSERT INTO usuarios (nombre, apellido, correo, contrasena, rol_id) VALUES
 ('Administrador', 'Sistema', 'admin@gmail.com', '$2b$10$dBa05e56IjqpXzi9Hzzbh.HjFfTr7Lc5kevXlMakQinv/ajQy/I0q', 1);

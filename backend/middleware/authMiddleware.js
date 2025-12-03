@@ -7,7 +7,8 @@ const authMiddleware = (req, res, next) => {
     if (!authHeader) {
         return res.status(401).json({
             success: false,
-            mensaje: 'Token de autorización no proporcionado'
+            mensaje: 'Token de autorización no proporcionado',
+            codigo: 'NO_TOKEN'
         });
     }
 
@@ -16,7 +17,8 @@ const authMiddleware = (req, res, next) => {
     if (parts.length !== 2) {
         return res.status(401).json({
             success: false,
-            mensaje: 'Token mal formateado'
+            mensaje: 'Token mal formateado',
+            codigo: 'MALFORMED_TOKEN'
         });
     }
 
@@ -25,7 +27,8 @@ const authMiddleware = (req, res, next) => {
     if (!/^Bearer$/i.test(scheme)) {
         return res.status(401).json({
             success: false,
-            mensaje: 'Token mal formateado'
+            mensaje: 'Token mal formateado',
+            codigo: 'MALFORMED_TOKEN'
         });
     }
 
@@ -37,12 +40,14 @@ const authMiddleware = (req, res, next) => {
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({
                 success: false,
-                mensaje: 'Token expirado, inicie sesión nuevamente'
+                mensaje: 'Sesión expirada',
+                codigo: 'TOKEN_EXPIRED'
             });
         }
         return res.status(401).json({
             success: false,
-            mensaje: 'Token inválido'
+            mensaje: 'Token inválido',
+            codigo: 'TOKEN_INVALID'
         });
     }
 };
@@ -52,14 +57,16 @@ const verificarRol = (...rolesPermitidos) => {
         if (!req.usuario) {
             return res.status(401).json({
                 success: false,
-                mensaje: 'Usuario no autenticado'
+                mensaje: 'Usuario no autenticado',
+                codigo: 'NOT_AUTHENTICATED'
             });
         }
 
         if (!rolesPermitidos.includes(req.usuario.rol)) {
             return res.status(403).json({
                 success: false,
-                mensaje: 'No tiene permisos para acceder a este recurso'
+                mensaje: 'No tiene permisos para acceder a este recurso',
+                codigo: 'FORBIDDEN'
             });
         }
 
@@ -67,4 +74,57 @@ const verificarRol = (...rolesPermitidos) => {
     };
 };
 
-module.exports = { authMiddleware, verificarRol };
+const verificarPermiso = (modulo, accion) => {
+    return async (req, res, next) => {
+        if (!req.usuario) {
+            return res.status(401).json({
+                success: false,
+                mensaje: 'Usuario no autenticado',
+                codigo: 'NOT_AUTHENTICATED'
+            });
+        }
+
+        if (req.usuario.rol === 'admin') {
+            return next();
+        }
+
+        try {
+            const UsuarioModel = require('../models/UsuarioModel');
+            const permisos = await UsuarioModel.obtenerPermisos(req.usuario.id);
+            
+            const permisoModulo = permisos.find(p => p.codigo === modulo);
+            
+            if (!permisoModulo) {
+                return res.status(403).json({
+                    success: false,
+                    mensaje: 'No tiene acceso a este módulo',
+                    codigo: 'NO_MODULE_ACCESS'
+                });
+            }
+
+            const tienePermiso = 
+                (accion === 'ver' && permisoModulo.puede_ver) ||
+                (accion === 'crear' && permisoModulo.puede_crear) ||
+                (accion === 'editar' && permisoModulo.puede_editar) ||
+                (accion === 'eliminar' && permisoModulo.puede_eliminar);
+
+            if (!tienePermiso) {
+                return res.status(403).json({
+                    success: false,
+                    mensaje: `No tiene permiso para ${accion} en este módulo`,
+                    codigo: 'NO_PERMISSION'
+                });
+            }
+
+            next();
+        } catch (error) {
+            console.error('Error verificando permisos:', error);
+            return res.status(500).json({
+                success: false,
+                mensaje: 'Error al verificar permisos'
+            });
+        }
+    };
+};
+
+module.exports = { authMiddleware, verificarRol, verificarPermiso };

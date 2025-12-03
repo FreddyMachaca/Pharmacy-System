@@ -3,7 +3,7 @@ const API_URL = window.location.origin + '/api';
 const api = {
     async request(endpoint, options = {}) {
         const url = `${API_URL}${endpoint}`;
-        const token = localStorage.getItem('pharmacy_token');
+        const token = sessionStorage.getItem('pharmacy_token');
         
         const defaultHeaders = {
             'Content-Type': 'application/json'
@@ -27,9 +27,13 @@ const api = {
             
             if (!response.ok) {
                 if (response.status === 401) {
-                    localStorage.removeItem('pharmacy_token');
-                    localStorage.removeItem('pharmacy_user');
-                    window.location.reload();
+                    const codigo = data.codigo || '';
+                    if (codigo === 'TOKEN_EXPIRED' || codigo === 'TOKEN_INVALID' || 
+                        codigo === 'TOKEN_REVOKED' || codigo === 'USER_DISABLED') {
+                        sessionStorage.clear();
+                        window.location.reload();
+                        return;
+                    }
                 }
                 throw new Error(data.mensaje || 'Error en la solicitud');
             }

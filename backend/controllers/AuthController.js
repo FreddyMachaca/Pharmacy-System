@@ -35,30 +35,45 @@ const AuthController = {
 
             await UsuarioModel.actualizarUltimoAcceso(usuario.id);
 
+            const permisos = await UsuarioModel.obtenerPermisos(usuario.id);
+
             const token = jwt.sign(
                 {
                     id: usuario.id,
                     correo: usuario.correo,
                     nombre: usuario.nombre,
                     apellido: usuario.apellido,
-                    rol: usuario.rol_nombre
+                    rol: usuario.rol_nombre,
+                    tokenVersion: usuario.token_version || 0
                 },
                 jwtConfig.secret,
                 { expiresIn: jwtConfig.expiresIn }
             );
+
+            const permisosMap = {};
+            permisos.forEach(p => {
+                permisosMap[p.codigo] = {
+                    ver: p.puede_ver === 1,
+                    crear: p.puede_crear === 1,
+                    editar: p.puede_editar === 1,
+                    eliminar: p.puede_eliminar === 1
+                };
+            });
 
             res.json({
                 success: true,
                 mensaje: 'Inicio de sesión exitoso',
                 data: {
                     token,
+                    expiresIn: jwtConfig.expiresIn,
                     usuario: {
                         id: usuario.id,
                         nombre: usuario.nombre,
                         apellido: usuario.apellido,
                         correo: usuario.correo,
                         rol: usuario.rol_nombre
-                    }
+                    },
+                    permisos: permisosMap
                 }
             });
 
@@ -78,9 +93,37 @@ const AuthController = {
             if (!usuario) {
                 return res.status(401).json({
                     success: false,
-                    mensaje: 'Usuario no encontrado'
+                    mensaje: 'Usuario no encontrado',
+                    codigo: 'TOKEN_INVALID'
                 });
             }
+
+            if (!usuario.activo) {
+                return res.status(401).json({
+                    success: false,
+                    mensaje: 'Usuario desactivado',
+                    codigo: 'USER_DISABLED'
+                });
+            }
+
+            if (req.usuario.tokenVersion !== usuario.token_version) {
+                return res.status(401).json({
+                    success: false,
+                    mensaje: 'Sesión inválida',
+                    codigo: 'TOKEN_REVOKED'
+                });
+            }
+
+            const permisos = await UsuarioModel.obtenerPermisos(usuario.id);
+            const permisosMap = {};
+            permisos.forEach(p => {
+                permisosMap[p.codigo] = {
+                    ver: p.puede_ver === 1,
+                    crear: p.puede_crear === 1,
+                    editar: p.puede_editar === 1,
+                    eliminar: p.puede_eliminar === 1
+                };
+            });
 
             res.json({
                 success: true,
@@ -91,7 +134,8 @@ const AuthController = {
                         apellido: usuario.apellido,
                         correo: usuario.correo,
                         rol: usuario.rol_nombre
-                    }
+                    },
+                    permisos: permisosMap
                 }
             });
 
@@ -122,27 +166,38 @@ const AuthController = {
                 });
             }
 
-            const usuario = await UsuarioModel.buscarPorCorreo(req.usuario.correo);
-
-            const contrasenaValida = await bcrypt.compare(contrasenaActual, usuario.contrasena);
-
-            if (!contrasenaValida) {
-                return res.status(401).json({
-                    success: false,
-                    mensaje: 'La contraseña actual es incorrecta'
-                });
-            }
-
-            const nuevaContrasenaHash = await bcrypt.hash(nuevaContrasena, 10);
-            await UsuarioModel.cambiarContrasena(usuario.id, nuevaContrasenaHash);
+            await UsuarioModel.cambiarContrasena(req.usuario.id, contrasenaActual, nuevaContrasena);
 
             res.json({
                 success: true,
-                mensaje: 'Contraseña actualizada correctamente'
+                mensaje: 'Contraseña actualizada correctamente. Por favor inicie sesión nuevamente.',
+                requireRelogin: true
             });
 
         } catch (error) {
             console.error('Error al cambiar contraseña:', error);
+            if (error.message === 'Contraseña actual incorrecta') {
+                return res.status(401).json({
+                    success: false,
+                    mensaje: error.message
+                });
+            }
+            res.status(500).json({
+                success: false,
+                mensaje: 'Error interno del servidor'
+            });
+        }
+    },
+
+    async logout(req, res) {
+        try {
+            await UsuarioModel.invalidarTokens(req.usuario.id);
+            res.json({
+                success: true,
+                mensaje: 'Sesión cerrada correctamente'
+            });
+        } catch (error) {
+            console.error('Error en logout:', error);
             res.status(500).json({
                 success: false,
                 mensaje: 'Error interno del servidor'

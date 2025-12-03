@@ -131,7 +131,11 @@ function renderPageContent(pageId) {
             }
             break;
         case 'usuarios':
-            content.innerHTML = renderComingSoon('Gestión de Usuarios', 'pi-user-edit');
+            if (typeof initUsuarios === 'function') {
+                initUsuarios();
+            } else {
+                content.innerHTML = renderComingSoon('Gestión de Usuarios', 'pi-user-edit');
+            }
             break;
         case 'caja':
             content.innerHTML = renderComingSoon('Control de Caja', 'pi-wallet');
