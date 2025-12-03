@@ -123,6 +123,13 @@ function renderPageContent(pageId) {
                 content.innerHTML = renderComingSoon('Productos Próximos a Vencer', 'pi-exclamation-triangle');
             }
             break;
+        case 'reportes-profesionales':
+            if (typeof initReportesProfesionales === 'function') {
+                initReportesProfesionales();
+            } else {
+                content.innerHTML = renderComingSoon('Reportes Exportables', 'pi-file-pdf');
+            }
+            break;
         case 'usuarios':
             content.innerHTML = renderComingSoon('Gestión de Usuarios', 'pi-user-edit');
             break;

@@ -17,7 +17,8 @@ const menuItems = {
     reportes: [
         { id: 'reporte-ventas', label: 'Reporte Ventas', icon: 'pi-chart-bar', roles: ['admin'] },
         { id: 'reporte-inventario', label: 'Reporte Inventario', icon: 'pi-chart-pie', roles: ['admin', 'inventario'] },
-        { id: 'reporte-vencimientos', label: 'Próximos a Vencer', icon: 'pi-exclamation-triangle', roles: ['admin', 'inventario'] }
+        { id: 'reporte-vencimientos', label: 'Próximos a Vencer', icon: 'pi-exclamation-triangle', roles: ['admin', 'inventario'] },
+        { id: 'reportes-profesionales', label: 'Reportes Exportables', icon: 'pi-file-pdf', roles: ['admin'] }
     ],
     sistema: [
         { id: 'usuarios', label: 'Usuarios', icon: 'pi-user-edit', roles: ['admin'] },
