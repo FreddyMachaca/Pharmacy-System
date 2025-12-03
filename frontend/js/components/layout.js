@@ -103,13 +103,25 @@ function renderPageContent(pageId) {
             content.innerHTML = renderComingSoon('Proveedores', 'pi-truck');
             break;
         case 'reporte-ventas':
-            content.innerHTML = renderComingSoon('Reporte de Ventas', 'pi-chart-bar');
+            if (typeof initReporteVentas === 'function') {
+                initReporteVentas();
+            } else {
+                content.innerHTML = renderComingSoon('Reporte de Ventas', 'pi-chart-bar');
+            }
             break;
         case 'reporte-inventario':
-            content.innerHTML = renderComingSoon('Reporte de Inventario', 'pi-chart-pie');
+            if (typeof initReporteInventario === 'function') {
+                initReporteInventario();
+            } else {
+                content.innerHTML = renderComingSoon('Reporte de Inventario', 'pi-chart-pie');
+            }
             break;
         case 'reporte-vencimientos':
-            content.innerHTML = renderComingSoon('Productos Próximos a Vencer', 'pi-exclamation-triangle');
+            if (typeof initReporteVencimientos === 'function') {
+                initReporteVencimientos();
+            } else {
+                content.innerHTML = renderComingSoon('Productos Próximos a Vencer', 'pi-exclamation-triangle');
+            }
             break;
         case 'usuarios':
             content.innerHTML = renderComingSoon('Gestión de Usuarios', 'pi-user-edit');

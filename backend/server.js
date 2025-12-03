@@ -7,6 +7,7 @@ const { testConnection } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const productoRoutes = require('./routes/productoRoutes');
 const ventaRoutes = require('./routes/ventaRoutes');
+const reporteRoutes = require('./routes/reporteRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,6 +27,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', productoRoutes);
 app.use('/api/ventas', ventaRoutes);
+app.use('/api/reportes', reporteRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({

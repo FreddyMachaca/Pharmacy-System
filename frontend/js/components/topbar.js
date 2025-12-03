@@ -11,15 +11,6 @@ function renderTopbar() {
             </div>
             
             <div class="topbar-right">
-                <button class="topbar-icon-btn" title="Notificaciones">
-                    <i class="pi pi-bell"></i>
-                    <span class="topbar-badge">3</span>
-                </button>
-                
-                <button class="topbar-icon-btn" title="Ayuda">
-                    <i class="pi pi-question-circle"></i>
-                </button>
-                
                 <div class="topbar-user" id="topbarUser">
                     <div class="topbar-user-avatar">${auth.getUserInitials()}</div>
                     <span class="topbar-user-name">${user?.nombre || 'Usuario'}</span>

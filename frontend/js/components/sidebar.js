@@ -133,7 +133,6 @@ function getPageTitle(pageId) {
         ...menuItems.principal,
         ...menuItems.ventas,
         ...menuItems.inventario,
-        ...menuItems.compras,
         ...menuItems.reportes,
         ...menuItems.sistema
     ];
