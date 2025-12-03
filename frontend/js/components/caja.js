@@ -1,6 +1,8 @@
 let cajaActual = null;
 let historialCajas = [];
 let ventasDelDia = [];
+let ultimaCajaCerrada = null;
+let historialPaginacion = { pagina: 1, limite: 10, total: 0 };
 
 async function initCaja() {
     if (!auth.hasPermission('caja', 'ver')) {
@@ -14,17 +16,28 @@ async function initCaja() {
         return;
     }
     
-    await cargarEstadoCaja();
+    await cargarEstadoCaja(1);
 }
 
-async function cargarEstadoCaja() {
+async function cargarEstadoCaja(paginaHistorial = historialPaginacion.pagina || 1) {
     try {
         showLoading();
         const response = await api.get('/caja/estado');
         cajaActual = response.data;
-        
-        const historial = await api.get('/caja/historial?limite=10');
-        historialCajas = historial;
+        ultimaCajaCerrada = response.ultimaCajaCerrada || null;
+        const limiteHistorial = historialPaginacion.limite || 10;
+        const historial = await api.get(`/caja/historial?limite=${limiteHistorial}&pagina=${paginaHistorial}`);
+        if (Array.isArray(historial)) {
+            historialCajas = historial;
+            historialPaginacion = { pagina: 1, limite: limiteHistorial, total: historial.length };
+        } else {
+            historialCajas = historial.data || [];
+            historialPaginacion = {
+                pagina: historial.pagina || paginaHistorial,
+                limite: historial.limite || limiteHistorial,
+                total: historial.total || historialCajas.length
+            };
+        }
         
         if (cajaActual) {
             ventasDelDia = await api.get(`/caja/${cajaActual.id}/ventas`);
@@ -63,9 +76,11 @@ function renderCaja() {
                     <table class="data-table">
                         <thead>
                             <tr>
+                                <th>Caja</th>
                                 <th>Fecha Apertura</th>
                                 <th>Usuario</th>
                                 <th>Monto Inicial</th>
+                                <th>Fondos Previos</th>
                                 <th>Ventas</th>
                                 <th>Gastos</th>
                                 <th>Monto Final</th>
@@ -77,6 +92,7 @@ function renderCaja() {
                         </tbody>
                     </table>
                 </div>
+                ${renderPaginacionHistorial()}
             </div>
         </div>
         
@@ -89,6 +105,10 @@ function renderCaja() {
 }
 
 function renderCajaAbierta() {
+    const reutilizado = parseFloat(cajaActual.monto_reutilizado || 0);
+    const usaFondosPrevios = reutilizado > 0;
+    const origen = cajaActual.origen_caja_id ? `Caja #${cajaActual.origen_caja_id}` : 'Cierre anterior';
+
     return `
         <div class="caja-estado caja-abierta">
             <div class="caja-estado-header">
@@ -99,14 +119,23 @@ function renderCajaAbierta() {
                     <h2>Caja Abierta</h2>
                     <p>Abierta por: ${cajaActual.usuario_nombre} ${cajaActual.usuario_apellido}</p>
                     <p>Desde: ${formatearFechaHora(cajaActual.fecha_apertura)}</p>
+                    ${parseFloat(cajaActual.monto_reutilizado || 0) > 0 ? `<p>Reutilizó: <strong>Bs. ${parseFloat(cajaActual.monto_reutilizado).toFixed(2)}</strong> del cierre anterior</p>` : ''}
                 </div>
             </div>
             
             <div class="caja-resumen">
-                <div class="caja-stat">
-                    <span class="stat-label">Monto Inicial</span>
-                    <span class="stat-value">Bs. ${parseFloat(cajaActual.monto_inicial).toFixed(2)}</span>
-                </div>
+                ${usaFondosPrevios ? `
+                    <div class="caja-stat reutiliza-fondos">
+                        <span class="stat-label">Fondos reutilizados</span>
+                        <span class="stat-value">Bs. ${reutilizado.toFixed(2)}</span>
+                        <small>${origen}</small>
+                    </div>
+                ` : `
+                    <div class="caja-stat">
+                        <span class="stat-label">Monto Inicial</span>
+                        <span class="stat-value">Bs. ${parseFloat(cajaActual.monto_inicial).toFixed(2)}</span>
+                    </div>
+                `}
                 <div class="caja-stat">
                     <span class="stat-label">Ventas del Día</span>
                     <span class="stat-value text-success">Bs. ${parseFloat(cajaActual.ventas_actuales || 0).toFixed(2)}</span>
@@ -165,16 +194,18 @@ function renderCajaCerrada() {
 
 function renderHistorialCajas() {
     if (!historialCajas || historialCajas.length === 0) {
-        return `<tr><td colspan="7" class="empty-table">No hay registros de caja</td></tr>`;
+        return `<tr><td colspan="9" class="empty-table">No hay registros de caja</td></tr>`;
     }
     
     return historialCajas.map(c => {
         const estadoClass = c.estado === 'abierta' ? 'badge-success' : 'badge-secondary';
         return `
             <tr>
+                <td><strong>Caja #${c.id}</strong></td>
                 <td>${formatearFechaHora(c.fecha_apertura)}</td>
                 <td>${c.usuario_nombre} ${c.usuario_apellido}</td>
                 <td>Bs. ${parseFloat(c.monto_inicial).toFixed(2)}</td>
+                <td>${renderFondosPrevios(c)}</td>
                 <td class="text-success">Bs. ${parseFloat(c.monto_ventas || 0).toFixed(2)}</td>
                 <td class="text-danger">Bs. ${parseFloat(c.monto_gastos || 0).toFixed(2)}</td>
                 <td><strong>Bs. ${parseFloat(c.monto_final || 0).toFixed(2)}</strong></td>
@@ -184,7 +215,63 @@ function renderHistorialCajas() {
     }).join('');
 }
 
+function renderFondosPrevios(caja) {
+    const reutilizado = parseFloat(caja.monto_reutilizado || 0);
+    if (!reutilizado || reutilizado <= 0) {
+        return '<span class="fondo-previo-no">—</span>';
+    }
+    const origen = caja.origen_caja_id ? `Caja #${caja.origen_caja_id}` : 'Cierre anterior';
+    return `
+        <div class="fondo-previo">
+            <span class="fondo-previo-valor">Bs. ${reutilizado.toFixed(2)}</span>
+            <small>${origen}</small>
+        </div>
+    `;
+}
+
+function renderPaginacionHistorial() {
+    const total = historialPaginacion.total || historialCajas.length || 0;
+    if (total === 0) return '';
+    const limite = historialPaginacion.limite || 10;
+    const pagina = historialPaginacion.pagina || 1;
+    const totalPaginas = Math.max(1, Math.ceil(total / limite));
+    const inicio = (pagina - 1) * limite + 1;
+    const fin = Math.min(pagina * limite, total);
+    const prevDisabled = pagina === 1 ? 'disabled' : '';
+    const nextDisabled = pagina === totalPaginas ? 'disabled' : '';
+
+    let paginas = '';
+    for (let i = 1; i <= totalPaginas; i++) {
+        if (i === 1 || i === totalPaginas || (i >= pagina - 1 && i <= pagina + 1)) {
+            paginas += `<button class="pagination-btn ${i === pagina ? 'active' : ''}" onclick="cambiarPaginaHistorial(${i})">${i}</button>`;
+        } else if (i === pagina - 2 || i === pagina + 2) {
+            paginas += '<span class="pagination-dots">...</span>';
+        }
+    }
+
+    return `
+        <div class="table-pagination">
+            <div class="pagination-info">
+                Mostrando ${inicio}-${fin} de ${total} cajas
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" onclick="cambiarPaginaHistorial(${pagina - 1})" ${prevDisabled}>
+                    <i class="pi pi-angle-left"></i>
+                </button>
+                ${paginas}
+                <button class="pagination-btn" onclick="cambiarPaginaHistorial(${pagina + 1})" ${nextDisabled}>
+                    <i class="pi pi-angle-right"></i>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
 function renderModalAbrirCaja() {
+    const disponibleAnterior = ultimaCajaCerrada ? parseFloat(ultimaCajaCerrada.monto_final || 0) : 0;
+    const puedeReutilizar = disponibleAnterior > 0;
+    const fechaAnterior = ultimaCajaCerrada ? formatearFechaHora(ultimaCajaCerrada.fecha_cierre || ultimaCajaCerrada.fecha_apertura) : '';
+    const disponibleTexto = disponibleAnterior.toFixed(2);
     return `
         <div class="modal-overlay" id="modal-abrir-caja" style="display: none;">
             <div class="modal-container modal-sm">
@@ -195,7 +282,27 @@ function renderModalAbrirCaja() {
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
+                    ${puedeReutilizar ? `
+                        <div class="fondo-anterior-card">
+                            <div class="fondo-anterior-header">
+                                <div>
+                                    <p class="fondo-label">Saldo disponible del cierre anterior</p>
+                                    <p class="fondo-valor">Bs. ${disponibleTexto}</p>
+                                    <small>${fechaAnterior}</small>
+                                </div>
+                                <label class="fondo-toggle">
+                                    <input type="checkbox" id="usar-fondo-anterior" onchange="toggleFondosAnteriores()">
+                                    <span>Utilizar fondos del día anterior</span>
+                                </label>
+                            </div>
+                            <div class="form-group fondo-reutilizado-grupo" id="grupo-monto-reutilizado" style="display: none;">
+                                <label for="monto-reutilizado">Monto a reutilizar (max. Bs. ${disponibleTexto})</label>
+                                <input type="number" id="monto-reutilizado" min="0" step="0.01" data-max="${disponibleTexto}" value="" inputmode="decimal" autocomplete="off" disabled oninput="validarMontoReutilizado()">
+                                <small>Se mostrará en el historial de caja.</small>
+                            </div>
+                        </div>
+                    ` : ''}
+                    <div class="form-group" id="grupo-monto-inicial">
                         <label for="monto-inicial">Monto Inicial (Bs.) *</label>
                         <input type="number" id="monto-inicial" min="0" step="0.01" value="0" required>
                     </div>
@@ -280,41 +387,119 @@ function renderModalGasto() {
 }
 
 function abrirModalAbrirCaja() {
-    document.getElementById('monto-inicial').value = '0';
-    document.getElementById('observaciones-apertura').value = '';
-    document.getElementById('modal-abrir-caja').style.display = 'flex';
+    const modal = document.getElementById('modal-abrir-caja');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    const montoInicialInput = document.getElementById('monto-inicial');
+    const grupoMontoInicial = document.getElementById('grupo-monto-inicial');
+    if (montoInicialInput) {
+        montoInicialInput.value = '0';
+        if (grupoMontoInicial) {
+            grupoMontoInicial.style.display = 'block';
+        }
+    }
+    const observacionesInput = document.getElementById('observaciones-apertura');
+    if (observacionesInput) {
+        observacionesInput.value = '';
+    }
+    const checkbox = document.getElementById('usar-fondo-anterior');
+    const reutilizadoInput = document.getElementById('monto-reutilizado');
+    const grupo = document.getElementById('grupo-monto-reutilizado');
+    if (checkbox && reutilizadoInput) {
+        checkbox.checked = false;
+        reutilizadoInput.disabled = true;
+        reutilizadoInput.value = '';
+        if (grupo) {
+            grupo.style.display = 'none';
+        }
+    }
 }
 
 function cerrarModalAbrirCaja() {
-    document.getElementById('modal-abrir-caja').style.display = 'none';
+    const modal = document.getElementById('modal-abrir-caja');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 function abrirModalCerrarCaja() {
-    document.getElementById('observaciones-cierre').value = '';
-    document.getElementById('modal-cerrar-caja').style.display = 'flex';
+    const modal = document.getElementById('modal-cerrar-caja');
+    if (!modal) return;
+    const observacionesInput = document.getElementById('observaciones-cierre');
+    if (observacionesInput) {
+        observacionesInput.value = '';
+    }
+    modal.style.display = 'flex';
 }
 
 function cerrarModalCerrarCaja() {
-    document.getElementById('modal-cerrar-caja').style.display = 'none';
+    const modal = document.getElementById('modal-cerrar-caja');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 function abrirModalGasto() {
-    document.getElementById('monto-gasto').value = '';
-    document.getElementById('descripcion-gasto').value = '';
-    document.getElementById('modal-gasto').style.display = 'flex';
+    const modal = document.getElementById('modal-gasto');
+    if (!modal) return;
+    const montoInput = document.getElementById('monto-gasto');
+    if (montoInput) {
+        montoInput.value = '';
+    }
+    const descripcionInput = document.getElementById('descripcion-gasto');
+    if (descripcionInput) {
+        descripcionInput.value = '';
+    }
+    modal.style.display = 'flex';
 }
 
 function cerrarModalGasto() {
-    document.getElementById('modal-gasto').style.display = 'none';
+    const modal = document.getElementById('modal-gasto');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 async function abrirCaja() {
     const montoInicial = parseFloat(document.getElementById('monto-inicial').value) || 0;
     const observaciones = document.getElementById('observaciones-apertura').value.trim();
+    const checkbox = document.getElementById('usar-fondo-anterior');
+    const reutilizadoInput = document.getElementById('monto-reutilizado');
+    const usarFondos = checkbox ? checkbox.checked : false;
+    let montoReutilizado = 0;
+    let origenCajaId = null;
+    const disponibleAnterior = ultimaCajaCerrada ? parseFloat(ultimaCajaCerrada.monto_final || 0) : 0;
+
+    if (usarFondos) {
+        if (!ultimaCajaCerrada || !ultimaCajaCerrada.id) {
+            showNotification('No existe una caja anterior para reutilizar fondos', 'warning');
+            return;
+        }
+        montoReutilizado = reutilizadoInput ? parseFloat(reutilizadoInput.value) || 0 : 0;
+        if (montoReutilizado <= 0) {
+            showNotification('El monto a reutilizar debe ser mayor a 0', 'warning');
+            return;
+        }
+        if (montoReutilizado > disponibleAnterior) {
+            showNotification('El monto reutilizado no puede superar el saldo anterior disponible', 'warning');
+            return;
+        }
+        origenCajaId = ultimaCajaCerrada.id;
+    }
+
+    if (montoInicial <= 0 && montoReutilizado <= 0) {
+        showNotification('Ingrese un monto inicial válido o reutilice fondos del cierre anterior', 'warning');
+        return;
+    }
     
     try {
         showLoading();
-        await api.post('/caja/abrir', { monto_inicial: montoInicial, observaciones });
+        await api.post('/caja/abrir', {
+            monto_inicial: montoInicial,
+            observaciones,
+            monto_reutilizado: montoReutilizado,
+            origen_caja_id: origenCajaId
+        });
         showNotification('Caja abierta correctamente', 'success');
         cerrarModalAbrirCaja();
         await cargarEstadoCaja();
@@ -345,6 +530,60 @@ async function cerrarCaja() {
     } finally {
         hideLoading();
     }
+}
+
+function toggleFondosAnteriores() {
+    const checkbox = document.getElementById('usar-fondo-anterior');
+    const reutilizadoInput = document.getElementById('monto-reutilizado');
+    const grupo = document.getElementById('grupo-monto-reutilizado');
+    const montoInicialInput = document.getElementById('monto-inicial');
+    const grupoMontoInicial = document.getElementById('grupo-monto-inicial');
+    if (!checkbox || !reutilizadoInput || !grupo) return;
+    if (checkbox.checked) {
+        reutilizadoInput.disabled = false;
+        reutilizadoInput.value = '';
+        grupo.style.display = 'block';
+        reutilizadoInput.focus();
+        if (grupoMontoInicial) {
+            grupoMontoInicial.style.display = 'none';
+        }
+        if (montoInicialInput) {
+            montoInicialInput.value = '0';
+        }
+    } else {
+        reutilizadoInput.disabled = true;
+        reutilizadoInput.value = '';
+        grupo.style.display = 'none';
+        if (grupoMontoInicial) {
+            grupoMontoInicial.style.display = 'block';
+        }
+        if (montoInicialInput) {
+            montoInicialInput.focus();
+        }
+    }
+}
+
+function validarMontoReutilizado() {
+    const reutilizadoInput = document.getElementById('monto-reutilizado');
+    if (!reutilizadoInput) return;
+    const max = parseFloat(reutilizadoInput.dataset.max || '0') || 0;
+    const valorTexto = reutilizadoInput.value;
+    if (valorTexto === '') {
+        return;
+    }
+    let valor = parseFloat(valorTexto);
+    if (isNaN(valor)) {
+        reutilizadoInput.value = '';
+        return;
+    }
+    if (valor < 0) {
+        valor = 0;
+    }
+    if (valor > max) {
+        valor = max;
+        showNotification('No puede reutilizar más de lo disponible del cierre anterior', 'warning');
+    }
+    reutilizadoInput.value = valor.toString();
 }
 
 async function registrarGasto() {
@@ -379,6 +618,14 @@ async function registrarGasto() {
 async function actualizarCaja() {
     await cargarEstadoCaja();
     showNotification('Datos actualizados', 'success');
+}
+
+async function cambiarPaginaHistorial(pagina) {
+    const totalPaginas = Math.max(1, Math.ceil((historialPaginacion.total || 0) / (historialPaginacion.limite || 10)));
+    if (pagina < 1 || pagina > totalPaginas || pagina === historialPaginacion.pagina) {
+        return;
+    }
+    await cargarEstadoCaja(pagina);
 }
 
 function renderVentasDelDia() {
@@ -439,3 +686,6 @@ window.abrirCaja = abrirCaja;
 window.cerrarCaja = cerrarCaja;
 window.registrarGasto = registrarGasto;
 window.actualizarCaja = actualizarCaja;
+window.toggleFondosAnteriores = toggleFondosAnteriores;
+window.validarMontoReutilizado = validarMontoReutilizado;
+window.cambiarPaginaHistorial = cambiarPaginaHistorial;

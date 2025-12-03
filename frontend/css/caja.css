@@ -133,6 +133,16 @@
     color: white !important;
 }
 
+.caja-stat.reutiliza-fondos {
+    border: 2px dashed var(--azul-primario);
+}
+
+.caja-stat.reutiliza-fondos small {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--text-secondary);
+}
+
 .caja-info-extra {
     margin-bottom: 1.5rem;
     padding: 1rem;
@@ -260,4 +270,126 @@
     text-align: center;
     color: var(--text-secondary);
     padding: 2rem;
+}
+
+.fondo-anterior-card {
+    background: var(--gris-claro);
+    border-radius: var(--borde-radius-md);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--azul-primario);
+}
+
+.fondo-anterior-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.fondo-label {
+    margin: 0;
+    font-weight: 600;
+    color: var(--texto-oscuro);
+}
+
+.fondo-valor {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--azul-profundo);
+    margin: 0.25rem 0;
+}
+
+.fondo-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--texto-oscuro);
+}
+
+.fondo-toggle input {
+    width: 18px;
+    height: 18px;
+}
+
+.fondo-previo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.fondo-previo-valor {
+    font-weight: 600;
+    color: var(--azul-profundo);
+}
+
+.fondo-previo small {
+    color: var(--text-secondary);
+}
+
+.fondo-previo-no {
+    color: var(--text-secondary);
+}
+
+.table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 1rem 0;
+    border-top: 1px solid var(--gris-claro);
+}
+
+.pagination-info {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border-color);
+    background: var(--blanco-puro);
+    color: var(--texto-oscuro);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: var(--borde-radius-sm);
+    cursor: pointer;
+    transition: background var(--transicion-rapida), color var(--transicion-rapida), border var(--transicion-rapida);
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--azul-primario);
+    color: var(--blanco-puro);
+    border-color: var(--azul-primario);
+}
+
+.pagination-btn.active {
+    background: var(--azul-primario);
+    color: var(--blanco-puro);
+    border-color: var(--azul-primario);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-dots {
+    padding: 0 0.5rem;
+    color: var(--text-secondary);
 }

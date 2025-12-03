@@ -6,8 +6,8 @@
 SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
 
-CREATE DATABASE IF NOT EXISTS farmacia_db 
-CHARACTER SET utf8mb4 
+CREATE DATABASE IF NOT EXISTS farmacia_db
+CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
 USE farmacia_db;
@@ -178,6 +178,43 @@ CREATE TABLE IF NOT EXISTS proveedores (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
+-- TABLA: caja
+-- =====================================================
+CREATE TABLE IF NOT EXISTS caja (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    fecha_apertura DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_cierre DATETIME,
+    monto_inicial DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    monto_reutilizado DECIMAL(12,2) DEFAULT 0.00,
+    monto_ventas DECIMAL(12,2) DEFAULT 0.00,
+    monto_gastos DECIMAL(12,2) DEFAULT 0.00,
+    monto_final DECIMAL(12,2) DEFAULT 0.00,
+    estado ENUM('abierta', 'cerrada') DEFAULT 'abierta',
+    origen_caja_id INT,
+    observaciones TEXT,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (origen_caja_id) REFERENCES caja(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- TABLA: movimientos_caja
+-- =====================================================
+CREATE TABLE IF NOT EXISTS movimientos_caja (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    caja_id INT NOT NULL,
+    tipo ENUM('ingreso', 'egreso') NOT NULL,
+    monto DECIMAL(12,2) NOT NULL,
+    descripcion VARCHAR(255),
+    usuario_id INT NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (caja_id) REFERENCES caja(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
 -- TABLA: ventas
 -- =====================================================
 CREATE TABLE IF NOT EXISTS ventas (
@@ -276,40 +313,6 @@ CREATE TABLE IF NOT EXISTS movimientos_inventario (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (lote_id) REFERENCES lotes(id) ON DELETE SET NULL ON UPDATE CASCADE,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- =====================================================
--- TABLA: caja
--- =====================================================
-CREATE TABLE IF NOT EXISTS caja (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    fecha_apertura DATETIME DEFAULT CURRENT_TIMESTAMP,
-    fecha_cierre DATETIME,
-    monto_inicial DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    monto_ventas DECIMAL(12,2) DEFAULT 0.00,
-    monto_gastos DECIMAL(12,2) DEFAULT 0.00,
-    monto_final DECIMAL(12,2) DEFAULT 0.00,
-    estado ENUM('abierta', 'cerrada') DEFAULT 'abierta',
-    observaciones TEXT,
-    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- =====================================================
--- TABLA: movimientos_caja
--- =====================================================
-CREATE TABLE IF NOT EXISTS movimientos_caja (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    caja_id INT NOT NULL,
-    tipo ENUM('ingreso', 'egreso') NOT NULL,
-    monto DECIMAL(12,2) NOT NULL,
-    descripcion VARCHAR(255),
-    usuario_id INT NOT NULL,
-    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (caja_id) REFERENCES caja(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

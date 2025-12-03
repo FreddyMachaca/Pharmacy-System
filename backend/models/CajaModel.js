@@ -21,15 +21,16 @@ const CajaModel = {
         return rows[0] || null;
     },
 
-    async abrirCaja(usuarioId, montoInicial, observaciones = null) {
+    async abrirCaja(usuarioId, montoInicial, observaciones = null, montoReutilizado = 0, origenCajaId = null) {
         const cajaAbierta = await this.obtenerCajaAbierta();
         if (cajaAbierta) {
             throw new Error('Ya existe una caja abierta');
         }
 
         const [result] = await pool.execute(
-            `INSERT INTO caja (usuario_id, monto_inicial, observaciones) VALUES (?, ?, ?)`,
-            [usuarioId, montoInicial, observaciones]
+            `INSERT INTO caja (usuario_id, monto_inicial, monto_reutilizado, origen_caja_id, observaciones)
+             VALUES (?, ?, ?, ?, ?)`,
+            [usuarioId, montoInicial, montoReutilizado || 0, origenCajaId, observaciones]
         );
         return result.insertId;
     },
@@ -69,13 +70,20 @@ const CajaModel = {
         return rows[0] || null;
     },
 
-    async listarHistorial(limite = 30) {
+    async listarHistorial(limite = 30, offset = 0) {
+        const parsedLimite = parseInt(limite, 10);
+        const parsedOffset = parseInt(offset, 10);
+        const safeLimite = Math.min(Math.max(parsedLimite || 10, 1), 100);
+        const safeOffset = Math.max(parsedOffset || 0, 0);
+
+        const [[{ total }]] = await pool.execute('SELECT COUNT(*) as total FROM caja');
+
         const [rows] = await pool.execute(
             `SELECT c.*, u.nombre as usuario_nombre, u.apellido as usuario_apellido
              FROM caja c
              INNER JOIN usuarios u ON c.usuario_id = u.id
              ORDER BY c.fecha_apertura DESC
-             LIMIT ${parseInt(limite)}`
+             LIMIT ${safeLimite} OFFSET ${safeOffset}`
         );
 
         await Promise.all(rows.map(async (caja) => {
@@ -86,7 +94,7 @@ const CajaModel = {
             }
         }));
 
-        return rows;
+        return { registros: rows, total };
     },
 
     async registrarGasto(cajaId, monto, descripcion) {
@@ -176,6 +184,18 @@ const CajaModel = {
             total_ventas: parseFloat(rows[0].total_ventas) || 0,
             cantidad_ventas: rows[0].cantidad_ventas || 0
         };
+    },
+
+    async obtenerUltimaCajaCerrada() {
+        const [rows] = await pool.execute(
+            `SELECT c.*, u.nombre as usuario_nombre, u.apellido as usuario_apellido
+             FROM caja c
+             INNER JOIN usuarios u ON c.usuario_id = u.id
+             WHERE c.estado = 'cerrada'
+             ORDER BY c.fecha_cierre DESC
+             LIMIT 1`
+        );
+        return rows[0] || null;
     }
 };
 
