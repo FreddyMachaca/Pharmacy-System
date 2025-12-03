@@ -185,6 +185,7 @@ CREATE TABLE IF NOT EXISTS ventas (
     numero_venta VARCHAR(20) UNIQUE NOT NULL,
     cliente_id INT,
     usuario_id INT NOT NULL,
+    caja_id INT,
     fecha_venta DATETIME DEFAULT CURRENT_TIMESTAMP,
     subtotal DECIMAL(12,2) NOT NULL DEFAULT 0.00,
     descuento DECIMAL(12,2) NOT NULL DEFAULT 0.00,
@@ -198,7 +199,8 @@ CREATE TABLE IF NOT EXISTS ventas (
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE SET NULL ON UPDATE CASCADE,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (caja_id) REFERENCES caja(id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -293,6 +295,21 @@ CREATE TABLE IF NOT EXISTS caja (
     observaciones TEXT,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- TABLA: movimientos_caja
+-- =====================================================
+CREATE TABLE IF NOT EXISTS movimientos_caja (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    caja_id INT NOT NULL,
+    tipo ENUM('ingreso', 'egreso') NOT NULL,
+    monto DECIMAL(12,2) NOT NULL,
+    descripcion VARCHAR(255),
+    usuario_id INT NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (caja_id) REFERENCES caja(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -15,12 +15,25 @@ const VentaModel = {
     },
 
     async crear(venta) {
-        const { numero_venta, cliente_id, usuario_id, subtotal, descuento, impuesto, total, metodo_pago, monto_recibido, cambio, observaciones } = venta;
+        const { numero_venta, cliente_id, usuario_id, subtotal, descuento, impuesto, total, metodo_pago, monto_recibido, cambio, observaciones, caja_id } = venta;
         
         const [result] = await pool.execute(`
-            INSERT INTO ventas (numero_venta, cliente_id, usuario_id, fecha_venta, subtotal, descuento, impuesto, total, metodo_pago, monto_recibido, cambio, observaciones)
-            VALUES (?, ?, ?, CONVERT_TZ(NOW(), @@session.time_zone, '-04:00'), ?, ?, ?, ?, ?, ?, ?, ?)
-        `, [numero_venta, cliente_id || null, usuario_id, subtotal, descuento || 0, impuesto || 0, total, metodo_pago || 'Efectivo', monto_recibido || total, cambio || 0, observaciones || null]);
+            INSERT INTO ventas (numero_venta, cliente_id, usuario_id, caja_id, fecha_venta, subtotal, descuento, impuesto, total, metodo_pago, monto_recibido, cambio, observaciones)
+            VALUES (?, ?, ?, ?, CONVERT_TZ(NOW(), @@session.time_zone, '-04:00'), ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+            numero_venta,
+            cliente_id || null,
+            usuario_id,
+            caja_id || null,
+            subtotal,
+            descuento || 0,
+            impuesto || 0,
+            total,
+            metodo_pago || 'Efectivo',
+            monto_recibido || total,
+            cambio || 0,
+            observaciones || null
+        ]);
         
         return result.insertId;
     },

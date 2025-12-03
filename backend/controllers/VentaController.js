@@ -1,6 +1,7 @@
 const ClienteModel = require('../models/ClienteModel');
 const VentaModel = require('../models/VentaModel');
 const ProductoModel = require('../models/ProductoModel');
+const CajaModel = require('../models/CajaModel');
 
 const VentaController = {
     async listarClientes(req, res) {
@@ -133,6 +134,11 @@ const VentaController = {
                 }
             }
 
+            const cajaActual = await CajaModel.obtenerCajaAbierta();
+            if (!cajaActual) {
+                return res.status(400).json({ success: false, mensaje: 'Debe abrir caja antes de registrar ventas' });
+            }
+
             const numero_venta = await VentaModel.generarNumeroVenta();
             
             let subtotal = 0;
@@ -148,6 +154,7 @@ const VentaController = {
                 numero_venta,
                 cliente_id,
                 usuario_id: req.usuario.id,
+                caja_id: cajaActual.id,
                 subtotal,
                 descuento,
                 impuesto: 0,

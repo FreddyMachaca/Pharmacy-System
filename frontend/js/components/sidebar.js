@@ -5,6 +5,7 @@ const menuItems = {
     ventas: [
         { id: 'punto-venta', label: 'Punto de Venta', icon: 'pi-shopping-cart' },
         { id: 'ventas', label: 'Historial Ventas', icon: 'pi-list' },
+        { id: 'caja', label: 'Caja', icon: 'pi-wallet' },
         { id: 'clientes', label: 'Clientes', icon: 'pi-users' }
     ],
     inventario: [
@@ -22,7 +23,6 @@ const menuItems = {
     ],
     sistema: [
         { id: 'usuarios', label: 'Usuarios', icon: 'pi-user-edit' },
-        { id: 'caja', label: 'Caja', icon: 'pi-wallet' },
         { id: 'configuracion', label: 'Configuración', icon: 'pi-cog' }
     ]
 };

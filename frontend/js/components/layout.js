@@ -138,10 +138,18 @@ function renderPageContent(pageId) {
             }
             break;
         case 'caja':
-            content.innerHTML = renderComingSoon('Control de Caja', 'pi-wallet');
+            if (typeof initCaja === 'function') {
+                initCaja();
+            } else {
+                content.innerHTML = renderComingSoon('Control de Caja', 'pi-wallet');
+            }
             break;
         case 'configuracion':
-            content.innerHTML = renderComingSoon('Configuración del Sistema', 'pi-cog');
+            if (typeof initConfiguracion === 'function') {
+                initConfiguracion();
+            } else {
+                content.innerHTML = renderComingSoon('Configuración del Sistema', 'pi-cog');
+            }
             break;
         default:
             content.innerHTML = renderDashboard();
