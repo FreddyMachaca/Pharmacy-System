@@ -41,10 +41,12 @@ function renderClientesPage() {
                         </button>
                     </div>
                 </div>
-                <div class="search-box">
-                    <div class="search-input-wrapper">
-                        <i class="pi pi-search"></i>
-                        <input type="text" id="searchCliente" placeholder="Buscar por nombre, documento o teléfono..." onkeyup="filtrarClientes()">
+                <div class="clientes-toolbar">
+                    <div class="search-box">
+                        <div class="search-input-wrapper">
+                            <i class="pi pi-search"></i>
+                            <input type="text" id="searchCliente" placeholder="Buscar por nombre, documento o teléfono..." onkeyup="filtrarClientes()">
+                        </div>
                     </div>
                     <label class="filter-toggle ${mostrarClientesInactivos ? 'active' : ''}">
                         <input type="checkbox" ${mostrarClientesInactivos ? 'checked' : ''} onchange="toggleClientesInactivos(this.checked)">
