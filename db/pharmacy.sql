@@ -402,9 +402,7 @@ INSERT INTO configuracion (clave, valor, descripcion) VALUES
 ('telefono', '(2) 234-5678', 'Teléfono principal'),
 ('celular', '70012345', 'Celular de contacto'),
 ('nit', '1234567890', 'NIT de la empresa'),
-('moneda', 'Bs.', 'Símbolo de moneda (Bolivianos)'),
-('iva', '13', 'Porcentaje de IVA Bolivia'),
-('impresora_tickets', 'POS-80', 'Nombre de impresora de tickets');
+('moneda', 'Bs.', 'Símbolo de moneda (Bolivianos)');
 
 INSERT INTO clientes (tipo_documento, numero_documento, nombre, apellido, ciudad) VALUES
 ('CI', '0000000', 'Cliente', 'General', 'La Paz');

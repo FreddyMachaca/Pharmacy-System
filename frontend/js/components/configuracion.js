@@ -90,28 +90,9 @@ function renderConfiguracion() {
                         <h2>Configuración Fiscal</h2>
                     </div>
                     <div class="config-section-body">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="config-moneda">Símbolo de Moneda</label>
-                                <input type="text" id="config-moneda" value="${configuracionData.moneda || 'Bs.'}" ${!puedeEditar ? 'disabled' : ''}>
-                            </div>
-                            <div class="form-group">
-                                <label for="config-iva">IVA (%)</label>
-                                <input type="number" id="config-iva" value="${configuracionData.iva || '13'}" min="0" max="100" ${!puedeEditar ? 'disabled' : ''}>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="config-section">
-                    <div class="config-section-header">
-                        <i class="pi pi-print"></i>
-                        <h2>Impresión</h2>
-                    </div>
-                    <div class="config-section-body">
                         <div class="form-group">
-                            <label for="config-impresora">Nombre de Impresora de Tickets</label>
-                            <input type="text" id="config-impresora" value="${configuracionData.impresora_tickets || ''}" placeholder="Ej: POS-80" ${!puedeEditar ? 'disabled' : ''}>
+                            <label for="config-moneda">Símbolo de Moneda</label>
+                            <input type="text" id="config-moneda" value="${configuracionData.moneda || 'Bs.'}" ${!puedeEditar ? 'disabled' : ''}>
                         </div>
                     </div>
                 </div>
@@ -139,9 +120,7 @@ async function guardarConfiguracion() {
         { clave: 'departamento', valor: document.getElementById('config-departamento').value.trim() },
         { clave: 'telefono', valor: document.getElementById('config-telefono').value.trim() },
         { clave: 'celular', valor: document.getElementById('config-celular').value.trim() },
-        { clave: 'moneda', valor: document.getElementById('config-moneda').value.trim() },
-        { clave: 'iva', valor: document.getElementById('config-iva').value.trim() },
-        { clave: 'impresora_tickets', valor: document.getElementById('config-impresora').value.trim() }
+        { clave: 'moneda', valor: document.getElementById('config-moneda').value.trim() }
     ];
     
     try {
