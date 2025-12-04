@@ -403,6 +403,3 @@ INSERT INTO configuracion (clave, valor, descripcion) VALUES
 ('celular', '70012345', 'Celular de contacto'),
 ('nit', '1234567890', 'NIT de la empresa'),
 ('moneda', 'Bs.', 'Símbolo de moneda (Bolivianos)');
-
-INSERT INTO clientes (tipo_documento, numero_documento, nombre, apellido, ciudad) VALUES
-('CI', '0000000', 'Cliente', 'General', 'La Paz');
