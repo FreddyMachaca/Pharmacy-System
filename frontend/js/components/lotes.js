@@ -68,15 +68,17 @@ function renderLotesPage() {
                         </button>
                     </div>
                 </div>
-                <div class="search-box">
-                    <div class="search-input-wrapper">
-                        <i class="pi pi-search"></i>
-                        <input 
-                            type="text" 
-                            id="searchLote" 
-                            placeholder="Buscar por producto o número de lote..."
-                            onkeyup="filtrarLotes()"
-                        >
+                <div class="modulo-toolbar">
+                    <div class="search-box">
+                        <div class="search-input-wrapper">
+                            <i class="pi pi-search"></i>
+                            <input 
+                                type="text" 
+                                id="searchLote" 
+                                placeholder="Buscar por producto o número de lote..."
+                                onkeyup="filtrarLotes()"
+                            >
+                        </div>
                     </div>
                     <div class="filter-buttons">
                         <button class="filter-btn ${filtroVencimiento === 'todos' ? 'active' : ''}" onclick="setFiltroVencimiento('todos')">

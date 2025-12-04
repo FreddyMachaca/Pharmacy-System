@@ -57,15 +57,17 @@ function renderMovimientosPage() {
                         </button>
                     </div>
                 </div>
-                <div class="search-box">
-                    <div class="search-input-wrapper">
-                        <i class="pi pi-search"></i>
-                        <input 
-                            type="text" 
-                            id="searchMovimiento" 
-                            placeholder="Buscar por producto o motivo..."
-                            onkeyup="filtrarMovimientos()"
-                        >
+                <div class="modulo-toolbar">
+                    <div class="search-box">
+                        <div class="search-input-wrapper">
+                            <i class="pi pi-search"></i>
+                            <input 
+                                type="text" 
+                                id="searchMovimiento" 
+                                placeholder="Buscar por producto o motivo..."
+                                onkeyup="filtrarMovimientos()"
+                            >
+                        </div>
                     </div>
                     <div class="filter-buttons">
                         <button class="filter-btn ${filtroTipoMovimiento === 'todos' ? 'active' : ''}" onclick="setFiltroTipoMovimiento('todos')">

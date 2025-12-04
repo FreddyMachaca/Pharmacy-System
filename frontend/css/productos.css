@@ -140,6 +140,14 @@
     margin-left: auto;
 }
 
+.modulo-toolbar .filter-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
 .stats-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -686,6 +694,11 @@ textarea.form-control {
         width: 100%;
         justify-content: center;
         margin-left: 0;
+    }
+
+    .modulo-toolbar .filter-buttons {
+        width: 100%;
+        justify-content: space-between;
     }
 }
 
