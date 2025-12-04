@@ -83,19 +83,6 @@ function renderConfiguracion() {
                         </div>
                     </div>
                 </div>
-                
-                <div class="config-section">
-                    <div class="config-section-header">
-                        <i class="pi pi-dollar"></i>
-                        <h2>Configuración Fiscal</h2>
-                    </div>
-                    <div class="config-section-body">
-                        <div class="form-group">
-                            <label for="config-moneda">Símbolo de Moneda</label>
-                            <input type="text" id="config-moneda" value="${configuracionData.moneda || 'Bs.'}" ${!puedeEditar ? 'disabled' : ''}>
-                        </div>
-                    </div>
-                </div>
             </div>
             
             ${puedeEditar ? `
@@ -119,8 +106,7 @@ async function guardarConfiguracion() {
         { clave: 'ciudad', valor: document.getElementById('config-ciudad').value.trim() },
         { clave: 'departamento', valor: document.getElementById('config-departamento').value.trim() },
         { clave: 'telefono', valor: document.getElementById('config-telefono').value.trim() },
-        { clave: 'celular', valor: document.getElementById('config-celular').value.trim() },
-        { clave: 'moneda', valor: document.getElementById('config-moneda').value.trim() }
+        { clave: 'celular', valor: document.getElementById('config-celular').value.trim() }
     ];
     
     try {
