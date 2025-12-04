@@ -21,16 +21,16 @@ const CajaModel = {
         return rows[0] || null;
     },
 
-    async abrirCaja(usuarioId, montoInicial, observaciones = null, montoReutilizado = 0, origenCajaId = null) {
+    async abrirCaja(usuarioId, montoInicial, observaciones = null) {
         const cajaAbierta = await this.obtenerCajaAbierta();
         if (cajaAbierta) {
             throw new Error('Ya existe una caja abierta');
         }
 
         const [result] = await pool.execute(
-            `INSERT INTO caja (usuario_id, fecha_apertura, monto_inicial, monto_reutilizado, origen_caja_id, observaciones)
-             VALUES (?, CONVERT_TZ(NOW(), @@session.time_zone, '-04:00'), ?, ?, ?, ?)`,
-            [usuarioId, montoInicial, montoReutilizado || 0, origenCajaId, observaciones]
+            `INSERT INTO caja (usuario_id, fecha_apertura, monto_inicial, observaciones)
+             VALUES (?, CONVERT_TZ(NOW(), @@session.time_zone, '-04:00'), ?, ?)`,
+            [usuarioId, montoInicial, observaciones]
         );
         return result.insertId;
     },
@@ -186,17 +186,7 @@ const CajaModel = {
         };
     },
 
-    async obtenerUltimaCajaCerrada() {
-        const [rows] = await pool.execute(
-            `SELECT c.*, u.nombre as usuario_nombre, u.apellido as usuario_apellido
-             FROM caja c
-             INNER JOIN usuarios u ON c.usuario_id = u.id
-             WHERE c.estado = 'cerrada'
-             ORDER BY c.fecha_cierre DESC
-             LIMIT 1`
-        );
-        return rows[0] || null;
-    }
+
 };
 
 module.exports = CajaModel;

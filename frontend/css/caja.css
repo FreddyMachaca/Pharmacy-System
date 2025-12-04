@@ -133,16 +133,6 @@
     color: white !important;
 }
 
-.caja-stat.reutiliza-fondos {
-    border: 2px dashed var(--azul-primario);
-}
-
-.caja-stat.reutiliza-fondos small {
-    display: block;
-    margin-top: 0.35rem;
-    color: var(--text-secondary);
-}
-
 .caja-info-extra {
     margin-bottom: 1.5rem;
     padding: 1rem;
@@ -270,68 +260,6 @@
     text-align: center;
     color: var(--text-secondary);
     padding: 2rem;
-}
-
-.fondo-anterior-card {
-    background: var(--gris-claro);
-    border-radius: var(--borde-radius-md);
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-left: 4px solid var(--azul-primario);
-}
-
-.fondo-anterior-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-}
-
-.fondo-label {
-    margin: 0;
-    font-weight: 600;
-    color: var(--texto-oscuro);
-}
-
-.fondo-valor {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--azul-profundo);
-    margin: 0.25rem 0;
-}
-
-.fondo-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-weight: 500;
-    color: var(--texto-oscuro);
-}
-
-.fondo-toggle input {
-    width: 18px;
-    height: 18px;
-}
-
-.fondo-previo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.fondo-previo-valor {
-    font-weight: 600;
-    color: var(--azul-profundo);
-}
-
-.fondo-previo small {
-    color: var(--text-secondary);
-}
-
-.fondo-previo-no {
-    color: var(--text-secondary);
 }
 
 .table-pagination {

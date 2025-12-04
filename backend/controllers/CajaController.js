@@ -4,11 +4,9 @@ const CajaController = {
     async obtenerEstado(req, res) {
         try {
             const resumen = await CajaModel.obtenerResumenActual();
-            const ultimaCaja = await CajaModel.obtenerUltimaCajaCerrada();
             res.json({ 
                 cajaAbierta: !!resumen,
-                data: resumen,
-                ultimaCajaCerrada: ultimaCaja
+                data: resumen
             });
         } catch (error) {
             console.error('Error al obtener estado de caja:', error);
@@ -18,56 +16,20 @@ const CajaController = {
 
     async abrirCaja(req, res) {
         try {
-            const { monto_inicial, observaciones, monto_reutilizado = 0, origen_caja_id = null } = req.body;
+            const { monto_inicial, observaciones } = req.body;
             const montoInicial = parseFloat(monto_inicial);
-            const montoReutilizado = parseFloat(monto_reutilizado) || 0;
             
-            if (Number.isNaN(montoInicial) || montoInicial < 0) {
+            if (Number.isNaN(montoInicial) || montoInicial <= 0) {
                 return res.status(400).json({
                     success: false,
-                    mensaje: 'El monto inicial es requerido y debe ser mayor o igual a 0'
+                    mensaje: 'El monto inicial es requerido y debe ser mayor a 0'
                 });
-            }
-
-            if (montoReutilizado < 0) {
-                return res.status(400).json({
-                    success: false,
-                    mensaje: 'El monto reutilizado no puede ser negativo'
-                });
-            }
-
-            let origenCaja = null;
-            if (montoReutilizado > 0) {
-                if (!origen_caja_id) {
-                    return res.status(400).json({
-                        success: false,
-                        mensaje: 'Debe seleccionar la caja de origen al reutilizar fondos'
-                    });
-                }
-
-                const ultimaCaja = await CajaModel.obtenerUltimaCajaCerrada();
-                if (!ultimaCaja || ultimaCaja.id !== Number(origen_caja_id)) {
-                    return res.status(400).json({
-                        success: false,
-                        mensaje: 'Solo se puede reutilizar fondos de la última caja cerrada'
-                    });
-                }
-
-                origenCaja = ultimaCaja;
-                if (montoReutilizado > parseFloat(origenCaja.monto_final || 0)) {
-                    return res.status(400).json({
-                        success: false,
-                        mensaje: 'El monto reutilizado supera el saldo disponible'
-                    });
-                }
             }
 
             const cajaId = await CajaModel.abrirCaja(
                 req.usuario.id,
                 montoInicial,
-                observaciones,
-                montoReutilizado,
-                origenCaja ? origenCaja.id : null
+                observaciones
             );
             const caja = await CajaModel.obtenerPorId(cajaId);
 

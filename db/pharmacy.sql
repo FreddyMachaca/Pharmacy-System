@@ -186,17 +186,14 @@ CREATE TABLE IF NOT EXISTS caja (
     fecha_apertura DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_cierre DATETIME,
     monto_inicial DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-    monto_reutilizado DECIMAL(12,2) DEFAULT 0.00,
     monto_ventas DECIMAL(12,2) DEFAULT 0.00,
     monto_gastos DECIMAL(12,2) DEFAULT 0.00,
     monto_final DECIMAL(12,2) DEFAULT 0.00,
     estado ENUM('abierta', 'cerrada') DEFAULT 'abierta',
-    origen_caja_id INT,
     observaciones TEXT,
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (origen_caja_id) REFERENCES caja(id) ON DELETE SET NULL ON UPDATE CASCADE
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
