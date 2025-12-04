@@ -656,7 +656,7 @@ function renderVentasDelDia() {
                         ${ventasDelDia.map(v => `
                             <tr>
                                 <td>${v.numero_venta}</td>
-                                <td>${new Date(v.fecha_venta).toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' })}</td>
+                                <td>${formatearHoraCorta(v.fecha_venta)}</td>
                                 <td>${v.cliente_nombre || 'Cliente General'}</td>
                                 <td><span class="badge badge-info">${v.metodo_pago}</span></td>
                                 <td><strong>Bs. ${parseFloat(v.total).toFixed(2)}</strong></td>
@@ -671,8 +671,27 @@ function renderVentasDelDia() {
 
 function formatearFechaHora(fecha) {
     if (!fecha) return '';
-    const d = new Date(fecha);
-    return d.toLocaleDateString('es-BO') + ' ' + d.toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' });
+    const formatter = new Intl.DateTimeFormat('es-BO', {
+        timeZone: 'America/La_Paz',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+    return formatter.format(new Date(fecha));
+}
+
+function formatearHoraCorta(fecha) {
+    if (!fecha) return '';
+    const formatter = new Intl.DateTimeFormat('es-BO', {
+        timeZone: 'America/La_Paz',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+    return formatter.format(new Date(fecha));
 }
 
 window.initCaja = initCaja;

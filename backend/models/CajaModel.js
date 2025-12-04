@@ -28,8 +28,8 @@ const CajaModel = {
         }
 
         const [result] = await pool.execute(
-            `INSERT INTO caja (usuario_id, monto_inicial, monto_reutilizado, origen_caja_id, observaciones)
-             VALUES (?, ?, ?, ?, ?)`,
+            `INSERT INTO caja (usuario_id, fecha_apertura, monto_inicial, monto_reutilizado, origen_caja_id, observaciones)
+             VALUES (?, CONVERT_TZ(NOW(), @@session.time_zone, '-04:00'), ?, ?, ?, ?)`,
             [usuarioId, montoInicial, montoReutilizado || 0, origenCajaId, observaciones]
         );
         return result.insertId;
@@ -48,7 +48,7 @@ const CajaModel = {
         await pool.execute(
             `UPDATE caja SET 
                 estado = 'cerrada', 
-                fecha_cierre = NOW(), 
+                fecha_cierre = CONVERT_TZ(NOW(), @@session.time_zone, '-04:00'), 
                 monto_ventas = ?,
                 monto_final = ?,
                 observaciones = CONCAT(IFNULL(observaciones, ''), ?)
@@ -79,11 +79,11 @@ const CajaModel = {
         const [[{ total }]] = await pool.execute('SELECT COUNT(*) as total FROM caja');
 
         const [rows] = await pool.execute(
-            `SELECT c.*, u.nombre as usuario_nombre, u.apellido as usuario_apellido
-             FROM caja c
-             INNER JOIN usuarios u ON c.usuario_id = u.id
-             ORDER BY c.fecha_apertura DESC
-             LIMIT ${safeLimite} OFFSET ${safeOffset}`
+              `SELECT c.*, u.nombre as usuario_nombre, u.apellido as usuario_apellido
+               FROM caja c
+               INNER JOIN usuarios u ON c.usuario_id = u.id
+               ORDER BY COALESCE(c.fecha_cierre, c.fecha_apertura) DESC
+               LIMIT ${safeLimite} OFFSET ${safeOffset}`
         );
 
         await Promise.all(rows.map(async (caja) => {
