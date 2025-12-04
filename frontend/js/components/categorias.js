@@ -39,15 +39,17 @@ function renderCategoriasPage() {
                         </button>
                     </div>
                 </div>
-                <div class="search-box">
-                    <div class="search-input-wrapper">
-                        <i class="pi pi-search"></i>
-                        <input 
-                            type="text" 
-                            id="searchCategoria" 
-                            placeholder="Buscar categoría..."
-                            onkeyup="filtrarCategorias()"
-                        >
+                <div class="modulo-toolbar">
+                    <div class="search-box">
+                        <div class="search-input-wrapper">
+                            <i class="pi pi-search"></i>
+                            <input 
+                                type="text" 
+                                id="searchCategoria" 
+                                placeholder="Buscar categoría..."
+                                onkeyup="filtrarCategorias()"
+                            >
+                        </div>
                     </div>
                     <label class="filter-toggle ${mostrarCategoriasInactivas ? 'active' : ''}">
                         <input type="checkbox" ${mostrarCategoriasInactivas ? 'checked' : ''} onchange="toggleCategoriasInactivas(this.checked)">

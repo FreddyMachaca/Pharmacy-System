@@ -47,15 +47,17 @@ function renderProductosPage() {
                         </button>
                     </div>
                 </div>
-                <div class="search-box">
-                    <div class="search-input-wrapper">
-                        <i class="pi pi-search"></i>
-                        <input 
-                            type="text" 
-                            id="searchProducto" 
-                            placeholder="Buscar por nombre, código o descripción..."
-                            onkeyup="filtrarProductos()"
-                        >
+                <div class="modulo-toolbar">
+                    <div class="search-box">
+                        <div class="search-input-wrapper">
+                            <i class="pi pi-search"></i>
+                            <input 
+                                type="text" 
+                                id="searchProducto" 
+                                placeholder="Buscar por nombre, código o descripción..."
+                                onkeyup="filtrarProductos()"
+                            >
+                        </div>
                     </div>
                     <label class="filter-toggle ${mostrarInactivos ? 'active' : ''}">
                         <input type="checkbox" ${mostrarInactivos ? 'checked' : ''} onchange="toggleInactivos(this.checked)">

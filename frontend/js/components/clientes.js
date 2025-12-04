@@ -41,7 +41,7 @@ function renderClientesPage() {
                         </button>
                     </div>
                 </div>
-                <div class="clientes-toolbar">
+                <div class="modulo-toolbar">
                     <div class="search-box">
                         <div class="search-input-wrapper">
                             <i class="pi pi-search"></i>

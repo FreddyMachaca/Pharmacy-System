@@ -39,15 +39,17 @@ function renderLaboratoriosPage() {
                         </button>
                     </div>
                 </div>
-                <div class="search-box">
-                    <div class="search-input-wrapper">
-                        <i class="pi pi-search"></i>
-                        <input 
-                            type="text" 
-                            id="searchLaboratorio" 
-                            placeholder="Buscar laboratorio..."
-                            onkeyup="filtrarLaboratorios()"
-                        >
+                <div class="modulo-toolbar">
+                    <div class="search-box">
+                        <div class="search-input-wrapper">
+                            <i class="pi pi-search"></i>
+                            <input 
+                                type="text" 
+                                id="searchLaboratorio" 
+                                placeholder="Buscar laboratorio..."
+                                onkeyup="filtrarLaboratorios()"
+                            >
+                        </div>
                     </div>
                     <label class="filter-toggle ${mostrarLabsInactivos ? 'active' : ''}">
                         <input type="checkbox" ${mostrarLabsInactivos ? 'checked' : ''} onchange="toggleLabsInactivos(this.checked)">
