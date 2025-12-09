@@ -1,11 +1,23 @@
-function renderLogin() {
+async function cargarNombreFarmacia() {
+    try {
+        const response = await fetch('/api/public/nombre-farmacia');
+        const data = await response.json();
+        return data.nombre || 'Pharmacy System';
+    } catch (error) {
+        return 'Pharmacy System';
+    }
+}
+
+async function renderLogin() {
     const container = document.getElementById('login-container');
+    const nombreFarmacia = await cargarNombreFarmacia();
+    window.nombreFarmacia = nombreFarmacia;
     
     container.innerHTML = `
         <div class="login-wrapper fade-in">
             <div class="login-card">
                 <div class="login-header">
-                    <h1 class="login-title">Pharmacy System</h1>
+                    <h1 class="login-title">${nombreFarmacia}</h1>
                     <p class="login-subtitle">Sistema de Gestión de Farmacia</p>
                 </div>
                 
@@ -64,7 +76,7 @@ function renderLogin() {
                 
                 <div class="login-footer">
                     <p class="login-footer-text">
-                        <strong>Pharmacy System</strong> | Sistema Local Portable
+                        <strong>${nombreFarmacia}</strong> | Sistema Local Portable
                     </p>
                 </div>
             </div>

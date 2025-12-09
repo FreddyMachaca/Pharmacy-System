@@ -37,6 +37,7 @@ function tieneAccesoModulo(moduloId) {
 function renderSidebar() {
     const user = auth.getUser();
     const userRole = user?.rol || '';
+    const nombreFarmacia = window.nombreFarmacia || 'Pharmacy System';
     
     return `
         <aside class="sidebar" id="sidebar">
@@ -45,7 +46,7 @@ function renderSidebar() {
                     <i class="pi pi-plus"></i>
                 </div>
                 <div class="sidebar-brand">
-                    <span class="sidebar-brand-name">Pharmacy System</span>
+                    <span class="sidebar-brand-name">${nombreFarmacia}</span>
                 </div>
             </div>
             

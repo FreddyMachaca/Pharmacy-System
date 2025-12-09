@@ -19,13 +19,22 @@ const app = {
         document.documentElement.setAttribute('data-theme', savedTheme);
     },
     
-    showLogin() {
+    async showLogin() {
         document.getElementById('login-container').classList.remove('hidden');
         document.getElementById('main-container').classList.add('hidden');
-        renderLogin();
+        await renderLogin();
     },
     
-    showMainLayout() {
+    async showMainLayout() {
+        if (!window.nombreFarmacia) {
+            try {
+                const response = await fetch('/api/public/nombre-farmacia');
+                const data = await response.json();
+                window.nombreFarmacia = data.nombre || 'Pharmacy System';
+            } catch (error) {
+                window.nombreFarmacia = 'Pharmacy System';
+            }
+        }
         document.getElementById('login-container').classList.add('hidden');
         document.getElementById('main-container').classList.remove('hidden');
         renderMainLayout();

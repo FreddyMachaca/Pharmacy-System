@@ -45,6 +45,16 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+app.get('/api/public/nombre-farmacia', async (req, res) => {
+    try {
+        const ConfiguracionModel = require('./models/ConfiguracionModel');
+        const nombre = await ConfiguracionModel.obtenerValor('nombre_farmacia', 'Pharmacy System');
+        res.json({ success: true, nombre });
+    } catch (error) {
+        res.json({ success: true, nombre: 'Pharmacy System' });
+    }
+});
+
 app.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
         res.sendFile(path.join(__dirname, '../frontend/index.html'));
