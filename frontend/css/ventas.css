@@ -598,3 +598,216 @@
         grid-column: span 1;
     }
 }
+
+[data-theme="dark"] .pos-left,
+[data-theme="dark"] .pos-right {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .pos-header,
+[data-theme="dark"] .pos-cart-header {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .pos-search {
+    background: var(--bg-input);
+}
+
+[data-theme="dark"] .pos-search input {
+    background: transparent;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .product-card {
+    background: var(--bg-input);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .product-card:hover {
+    background: var(--surface-hover);
+}
+
+[data-theme="dark"] .pos-cart-item {
+    background: var(--bg-input);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .cart-totals {
+    background: var(--bg-table-header);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .qty-btn {
+    background: var(--bg-card);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .qty-input {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .ventas-table-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .detalle-modal-content {
+    background: var(--bg-modal);
+}
+
+[data-theme="dark"] .detalle-header {
+    background: var(--bg-table-header);
+}
+
+[data-theme="dark"] .pos-cart-footer {
+    background: var(--bg-table-header);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .pos-cliente {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .cliente-search input {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .cliente-info {
+    background: rgba(0, 194, 255, 0.15);
+    color: var(--azul-primario);
+}
+
+[data-theme="dark"] .clientes-sugeridos {
+    background: var(--bg-dropdown);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .sugerencia-item {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .sugerencia-item:hover {
+    background: var(--surface-hover);
+}
+
+[data-theme="dark"] .sugerencia-item strong {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .descuento-input input {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .metodo-pago select,
+[data-theme="dark"] .monto-pago input {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .ticket-preview {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .ticket-header {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .ticket-header h3 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .ticket-totals {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .pos-total-row {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .cart-item-qty input {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .pos-cart-empty {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .pos-empty {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .product-card {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .pos-product-name {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .pos-product-stock {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .cart-item-price {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .qty-btn {
+    background: var(--bg-input);
+    color: var(--azul-primario);
+}
+
+[data-theme="dark"] .qty-btn:hover {
+    background: var(--azul-primario);
+    color: white;
+}
+
+[data-theme="dark"] .pos-cart-item {
+    background: var(--bg-input);
+}
+
+[data-theme="dark"] .cart-item-name {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .cart-item-remove {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .pos-products-grid {
+    background: var(--bg-body);
+}
+
+[data-theme="dark"] .pos-search-container input {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .pos-categoria-btn {
+    background: var(--bg-input);
+    border-color: var(--border-light);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .pos-categoria-btn:hover,
+[data-theme="dark"] .pos-categoria-btn.active {
+    background: var(--azul-primario);
+    color: white;
+}
+
+[data-theme="dark"] .pos-product-card {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+}
+

@@ -1,5 +1,7 @@
 const app = {
     async init() {
+        this.initTheme();
+        
         if (auth.isAuthenticated()) {
             const isValid = await auth.verificarToken();
             if (isValid) {
@@ -10,6 +12,11 @@ const app = {
         } else {
             this.showLogin();
         }
+    },
+    
+    initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
     },
     
     showLogin() {

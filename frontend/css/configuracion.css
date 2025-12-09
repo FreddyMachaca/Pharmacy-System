@@ -123,3 +123,84 @@
         grid-template-columns: 1fr;
     }
 }
+
+[data-theme="dark"] .config-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .config-section-header {
+    background: var(--bg-table-header);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .config-section-body .form-group input,
+[data-theme="dark"] .config-section-body .form-group select,
+[data-theme="dark"] .config-section-body .form-group textarea {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .config-section-body .form-group input:disabled,
+[data-theme="dark"] .config-section-body .form-group select:disabled {
+    background: var(--bg-table-header);
+}
+
+.theme-selector {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.25rem 2rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--borde-radius-md);
+    background: var(--blanco-puro);
+    cursor: pointer;
+    transition: all var(--transicion-rapida);
+    min-width: 120px;
+}
+
+.theme-option i {
+    font-size: 1.5rem;
+    color: var(--texto-oscuro);
+}
+
+.theme-option span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--texto-oscuro);
+}
+
+.theme-option:hover {
+    border-color: var(--azul-primario);
+    background: var(--gris-claro);
+}
+
+.theme-option.active {
+    border-color: var(--azul-primario);
+    background: linear-gradient(135deg, rgba(0, 194, 255, 0.1), rgba(37, 110, 255, 0.1));
+}
+
+.theme-option.active i {
+    color: var(--azul-primario);
+}
+
+[data-theme="dark"] .theme-option {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+}
+
+[data-theme="dark"] .theme-option:hover {
+    background: var(--surface-hover);
+}
+
+[data-theme="dark"] .theme-option.active {
+    background: rgba(0, 194, 255, 0.15);
+}

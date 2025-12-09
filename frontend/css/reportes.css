@@ -531,3 +531,39 @@
         border: 1px solid #ddd;
     }
 }
+
+[data-theme="dark"] .reporte-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .reporte-section-header {
+    background: var(--bg-table-header);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .resumen-card {
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .reporte-table th {
+    background: var(--bg-table-header);
+    color: var(--text-secondary);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .reporte-table td {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .reporte-table tbody tr:hover {
+    background: var(--bg-table-row-hover);
+}
+
+[data-theme="dark"] .reportes-filtros input[type="date"],
+[data-theme="dark"] .reportes-filtros select {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}

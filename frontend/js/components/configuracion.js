@@ -30,6 +30,7 @@ async function cargarConfiguracion() {
 
 function renderConfiguracion() {
     const puedeEditar = auth.hasPermission('configuracion', 'editar');
+    const currentTheme = localStorage.getItem('theme') || 'light';
     
     const content = `
         <div class="config-container">
@@ -38,6 +39,28 @@ function renderConfiguracion() {
             </div>
             
             <div class="config-sections">
+                <div class="config-section">
+                    <div class="config-section-header">
+                        <i class="pi pi-palette"></i>
+                        <h2>Apariencia</h2>
+                    </div>
+                    <div class="config-section-body">
+                        <div class="form-group">
+                            <label>Tema de la Interfaz</label>
+                            <div class="theme-selector">
+                                <button class="theme-option ${currentTheme === 'light' ? 'active' : ''}" onclick="setTheme('light')">
+                                    <i class="pi pi-sun"></i>
+                                    <span>Claro</span>
+                                </button>
+                                <button class="theme-option ${currentTheme === 'dark' ? 'active' : ''}" onclick="setTheme('dark')">
+                                    <i class="pi pi-moon"></i>
+                                    <span>Oscuro</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="config-section">
                     <div class="config-section-header">
                         <i class="pi pi-building"></i>
@@ -98,6 +121,23 @@ function renderConfiguracion() {
     document.getElementById('pageContent').innerHTML = content;
 }
 
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    document.querySelectorAll('.theme-option').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+    
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        const icon = themeToggle.querySelector('i');
+        icon.className = theme === 'dark' ? 'pi pi-sun' : 'pi pi-moon';
+        themeToggle.title = theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
+    }
+}
+
 async function guardarConfiguracion() {
     const configuraciones = [
         { clave: 'nombre_farmacia', valor: document.getElementById('config-nombre').value.trim() },
@@ -123,3 +163,4 @@ async function guardarConfiguracion() {
 
 window.initConfiguracion = initConfiguracion;
 window.guardarConfiguracion = guardarConfiguracion;
+window.setTheme = setTheme;

@@ -546,3 +546,109 @@ html, body {
 .notification-hide {
     animation: fadeOut 0.3s ease forwards;
 }
+
+[data-theme="dark"] .login-card,
+[data-theme="dark"] .card,
+[data-theme="dark"] .modal-content,
+[data-theme="dark"] .dropdown-menu {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+    border-color: var(--azul-primario);
+    background: var(--bg-input);
+}
+
+[data-theme="dark"] .table th {
+    background: var(--bg-table-header);
+    color: var(--text-primary);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .table td {
+    border-color: var(--border-light);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .table tr:hover {
+    background: var(--bg-table-row-hover);
+}
+
+[data-theme="dark"] .sidebar-footer,
+[data-theme="dark"] .sidebar-header {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .menu-section-title {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .topbar-logout {
+    background: rgba(231, 76, 60, 0.15);
+}
+
+[data-theme="dark"] .login-header::after {
+    background: var(--bg-card);
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-secondary:hover {
+    background: var(--surface-hover);
+}
+
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .info-card {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .modal-backdrop {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: var(--bg-sidebar);
+}
+
+[data-theme="dark"] #login-container {
+    background: linear-gradient(135deg, var(--gris-claro) 0%, #1a2332 50%, var(--gris-claro) 100%);
+}
+
+[data-theme="dark"] .loader-spinner {
+    background: var(--bg-card);
+}
+
+[data-theme="dark"] .loader-spinner span {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .notification {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .notification span {
+    color: var(--text-primary);
+}
+

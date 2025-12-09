@@ -501,3 +501,47 @@
         margin: 1rem;
     }
 }
+
+[data-theme="dark"] .usuarios-tabs {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .tab-btn {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .data-table {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .data-table th {
+    background: var(--bg-table-header);
+    color: var(--text-secondary);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .data-table td {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .data-table tbody tr:hover {
+    background: var(--bg-table-row-hover);
+}
+
+[data-theme="dark"] .permisos-grid {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+}
+
+[data-theme="dark"] .permisos-header {
+    background: var(--bg-table-header);
+}
+
+[data-theme="dark"] .permisos-row {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .permisos-row:hover {
+    background: var(--bg-table-row-hover);
+}

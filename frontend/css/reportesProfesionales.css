@@ -639,3 +639,155 @@
         flex-direction: column;
     }
 }
+
+[data-theme="dark"] .reportes-profesionales-container {
+    background: var(--bg-body);
+}
+
+[data-theme="dark"] .reporte-config-panel {
+    background: var(--bg-sidebar);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .config-title {
+    color: var(--text-primary);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .config-section {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .config-section h4 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-group label {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .form-control {
+    background: var(--bg-input);
+    border-color: var(--border-input);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-control:focus {
+    border-color: var(--azul-primario);
+}
+
+[data-theme="dark"] .format-option {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .format-option:hover {
+    background: var(--surface-hover);
+}
+
+[data-theme="dark"] .format-option.active {
+    background: rgba(0, 194, 255, 0.15);
+    border-color: var(--azul-primario);
+}
+
+[data-theme="dark"] .reporte-preview-panel {
+    background: var(--bg-sidebar);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .preview-title {
+    color: var(--text-primary);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .preview-document {
+    background: var(--bg-card);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .preview-header {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .preview-empresa h2 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .preview-empresa p {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .preview-tipo-reporte h3 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .preview-tipo-reporte span {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .preview-summary {
+    background: var(--bg-table-header);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .summary-item span:first-child {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .summary-item span:last-child {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .preview-table th {
+    background: var(--bg-table-header);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .preview-table td {
+    color: var(--text-secondary);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .preview-table tr:nth-child(even) td {
+    background: var(--bg-table-header);
+}
+
+[data-theme="dark"] .preview-totals {
+    background: var(--bg-table-header);
+    border-color: var(--border-light);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .preview-footer {
+    border-color: var(--border-light);
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .modal-pdf-content {
+    background: var(--bg-card);
+}
+
+[data-theme="dark"] .modal-pdf-header {
+    background: var(--bg-sidebar);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .modal-pdf-header h3 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-pdf-body {
+    background: var(--bg-body);
+}
+
+[data-theme="dark"] .preview-empty {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .form-control:hover,
+[data-theme="dark"] .form-control:focus {
+    background: var(--bg-card);
+    border-color: var(--azul-primario);
+}
