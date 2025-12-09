@@ -62,29 +62,6 @@ function initReportesProfesionales() {
                             <i class="pi pi-play"></i> Generar Reporte
                         </button>
                     </div>
-                    
-                    <div class="config-section">
-                        <h3 class="config-title"><i class="pi pi-building"></i> Datos de la Farmacia</h3>
-                        <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" id="farmaNombre" class="form-control" value="${configFarmacia.nombre}">
-                        </div>
-                        <div class="form-group">
-                            <label>Dirección</label>
-                            <input type="text" id="farmaDireccion" class="form-control" value="${configFarmacia.direccion}">
-                        </div>
-                        <div class="form-group">
-                            <label>Teléfono</label>
-                            <input type="text" id="farmaTelefono" class="form-control" value="${configFarmacia.telefono}">
-                        </div>
-                        <div class="form-group">
-                            <label>NIT</label>
-                            <input type="text" id="farmaNIT" class="form-control" value="${configFarmacia.nit}">
-                        </div>
-                        <button class="btn-guardar-config" onclick="guardarConfigFarmacia()">
-                            <i class="pi pi-save"></i> Guardar Configuración
-                        </button>
-                    </div>
                 </div>
                 
                 <div class="reporte-preview-panel">
@@ -284,12 +261,16 @@ async function obtenerDatosReporte(tipo) {
 function mostrarVistaPrevia(tipo, datos) {
     const preview = document.getElementById('previewContent');
     const formatMoney = (val) => `Bs. ${parseFloat(val || 0).toFixed(2)}`;
+    const logoFarmacia = window.logoFarmacia || null;
     
     let html = `
         <div class="preview-document">
             <div class="preview-header-doc">
                 <div class="header-logo">
-                    <i class="pi pi-plus-circle"></i>
+                    ${logoFarmacia 
+                        ? `<img src="${logoFarmacia}" alt="Logo" class="reporte-logo-img">`
+                        : `<i class="pi pi-plus-circle"></i>`
+                    }
                 </div>
                 <div class="header-info">
                     <h1>${configFarmacia.nombre}</h1>
@@ -516,7 +497,7 @@ async function descargarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    agregarEncabezadoPDF(doc);
+    await agregarEncabezadoPDF(doc);
     
     if (reporteActual === 'ventas') {
         generarPDFVentas(doc, datosReporte);
@@ -538,9 +519,39 @@ async function descargarPDF() {
     document.getElementById('modalPDF').style.display = 'flex';
 }
 
-function agregarEncabezadoPDF(doc) {
+async function cargarImagenBase64(url) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = function() {
+            resolve(null);
+        };
+        img.src = url;
+    });
+}
+
+async function agregarEncabezadoPDF(doc) {
     doc.setFillColor(41, 128, 185);
     doc.rect(0, 0, 210, 40, 'F');
+    
+    const logoFarmacia = window.logoFarmacia || null;
+    if (logoFarmacia) {
+        try {
+            const logoBase64 = await cargarImagenBase64(logoFarmacia);
+            if (logoBase64) {
+                doc.addImage(logoBase64, 'PNG', 10, 5, 30, 30);
+            }
+        } catch (e) {
+        }
+    }
     
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(20);

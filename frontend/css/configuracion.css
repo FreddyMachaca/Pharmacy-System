@@ -204,3 +204,199 @@
 [data-theme="dark"] .theme-option.active {
     background: rgba(0, 194, 255, 0.15);
 }
+
+.logo-actual-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: var(--gris-claro);
+    border-radius: var(--borde-radius-md);
+    margin-bottom: 1rem;
+}
+
+.logo-actual-preview {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--blanco-puro);
+    border-radius: var(--borde-radius-md);
+    border: 2px solid var(--border-color);
+    overflow: hidden;
+}
+
+.logo-actual-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.logo-default-icon {
+    font-size: 2.5rem;
+    color: var(--azul-primario);
+}
+
+.logo-actual-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.logo-status {
+    font-weight: 500;
+    color: var(--texto-oscuro);
+    margin: 0;
+}
+
+.logo-upload-section {
+    margin-bottom: 1rem;
+}
+
+.logo-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--borde-radius-md);
+    cursor: pointer;
+    transition: all var(--transicion-rapida);
+    text-align: center;
+}
+
+.logo-upload-label:hover {
+    border-color: var(--azul-primario);
+    background: rgba(0, 194, 255, 0.05);
+}
+
+.logo-upload-label i {
+    font-size: 2rem;
+    color: var(--azul-primario);
+}
+
+.logo-upload-label span {
+    font-weight: 500;
+    color: var(--texto-oscuro);
+}
+
+.logo-upload-label small {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.logos-galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.logo-item {
+    position: relative;
+    aspect-ratio: 1;
+    border: 2px solid var(--border-color);
+    border-radius: var(--borde-radius-md);
+    overflow: hidden;
+    background: var(--blanco-puro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.logo-item.active {
+    border-color: var(--azul-primario);
+    box-shadow: 0 0 0 3px rgba(0, 194, 255, 0.2);
+}
+
+.logo-item img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.logo-item-actions {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.logo-item:hover .logo-item-actions {
+    opacity: 1;
+}
+
+.btn-logo-action {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: transform 0.2s;
+}
+
+.btn-logo-action:hover {
+    transform: scale(1.1);
+}
+
+.btn-seleccionar {
+    background: var(--verde-exito);
+    color: white;
+}
+
+.btn-eliminar {
+    background: var(--rojo-alerta);
+    color: white;
+}
+
+.no-logos {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 1rem;
+    font-style: italic;
+}
+
+[data-theme="dark"] .logo-actual-container {
+    background: var(--bg-table-header);
+}
+
+[data-theme="dark"] .logo-actual-preview {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .logo-status {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .logo-upload-label {
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .logo-upload-label:hover {
+    background: rgba(0, 194, 255, 0.1);
+}
+
+[data-theme="dark"] .logo-upload-label span {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .logo-item {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+}

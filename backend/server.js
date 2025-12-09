@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fileUpload = require('express-fileupload');
 const { testConnection } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const productoRoutes = require('./routes/productoRoutes');
@@ -12,6 +13,7 @@ const usuarioRoutes = require('./routes/usuarioRoutes');
 const cajaRoutes = require('./routes/cajaRoutes');
 const configuracionRoutes = require('./routes/configuracionRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const logoRoutes = require('./routes/logoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,8 +27,13 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+    abortOnLimit: true
+}));
 
 app.use(express.static(path.join(__dirname, '../frontend')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', productoRoutes);
@@ -36,6 +43,7 @@ app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/caja', cajaRoutes);
 app.use('/api/configuracion', configuracionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/logos', logoRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({

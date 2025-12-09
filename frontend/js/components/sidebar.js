@@ -38,12 +38,16 @@ function renderSidebar() {
     const user = auth.getUser();
     const userRole = user?.rol || '';
     const nombreFarmacia = window.nombreFarmacia || 'Pharmacy System';
+    const logoFarmacia = window.logoFarmacia || null;
     
     return `
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-logo">
-                    <i class="pi pi-plus"></i>
+                    ${logoFarmacia 
+                        ? `<img src="${logoFarmacia}" alt="Logo" class="sidebar-logo-img">`
+                        : `<i class="pi pi-plus"></i>`
+                    }
                 </div>
                 <div class="sidebar-brand">
                     <span class="sidebar-brand-name">${nombreFarmacia}</span>

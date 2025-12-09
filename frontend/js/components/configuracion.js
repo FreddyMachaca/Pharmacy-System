@@ -1,4 +1,6 @@
 let configuracionData = {};
+let logosData = [];
+let logoActivo = null;
 
 async function initConfiguracion() {
     if (!auth.hasPermission('configuracion', 'ver')) {
@@ -12,6 +14,7 @@ async function initConfiguracion() {
         return;
     }
     
+    await cargarLogos();
     await cargarConfiguracion();
 }
 
@@ -20,11 +23,23 @@ async function cargarConfiguracion() {
         showLoading();
         configuracionData = await api.get('/configuracion/farmacia');
         renderConfiguracion();
+        renderGaleriaLogos();
     } catch (error) {
         console.error('Error cargando configuración:', error);
         showNotification('Error al cargar configuración', 'error');
     } finally {
         hideLoading();
+    }
+}
+
+async function cargarLogos() {
+    try {
+        const response = await api.get('/logos');
+        logosData = response.logos || [];
+        logoActivo = response.logoActivo || null;
+        window.logoFarmacia = logoActivo;
+    } catch (error) {
+        console.error('Error cargando logos:', error);
     }
 }
 
@@ -57,6 +72,41 @@ function renderConfiguracion() {
                                     <span>Oscuro</span>
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-section">
+                    <div class="config-section-header">
+                        <i class="pi pi-image"></i>
+                        <h2>Logo de la Farmacia</h2>
+                    </div>
+                    <div class="config-section-body">
+                        <div class="logo-actual-container">
+                            <div class="logo-actual-preview" id="logoActualPreview">
+                                ${logoActivo 
+                                    ? `<img src="${logoActivo}" alt="Logo actual">`
+                                    : `<i class="pi pi-plus-circle logo-default-icon"></i>`
+                                }
+                            </div>
+                            <div class="logo-actual-info">
+                                <p class="logo-status">${logoActivo ? 'Logo personalizado activo' : 'Usando icono por defecto'}</p>
+                                ${logoActivo ? `<button class="btn btn-sm btn-danger" onclick="quitarLogoActivo()"><i class="pi pi-times"></i> Quitar logo</button>` : ''}
+                            </div>
+                        </div>
+                        
+                        ${puedeEditar ? `
+                            <div class="logo-upload-section">
+                                <label class="logo-upload-label">
+                                    <input type="file" id="logoInput" accept="image/*" onchange="subirLogo()" hidden>
+                                    <i class="pi pi-upload"></i>
+                                    <span>Subir nuevo logo</span>
+                                    <small>Máximo 50MB - PNG, JPG, GIF, WEBP, SVG</small>
+                                </label>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="logos-galeria" id="logosGaleria">
                         </div>
                     </div>
                 </div>
@@ -153,6 +203,7 @@ async function guardarConfiguracion() {
         showLoading();
         await api.put('/configuracion/multiples', { configuraciones });
         showNotification('Configuración guardada correctamente', 'success');
+        window.nombreFarmacia = configuraciones.find(c => c.clave === 'nombre_farmacia')?.valor || window.nombreFarmacia;
         await cargarConfiguracion();
     } catch (error) {
         showNotification(error.message || 'Error al guardar configuración', 'error');
@@ -161,6 +212,139 @@ async function guardarConfiguracion() {
     }
 }
 
+function renderGaleriaLogos() {
+    const galeria = document.getElementById('logosGaleria');
+    if (!galeria) return;
+    
+    if (logosData.length === 0) {
+        galeria.innerHTML = '<p class="no-logos">No hay logos subidos</p>';
+        return;
+    }
+    
+    galeria.innerHTML = logosData.map(logo => `
+        <div class="logo-item ${logoActivo === logo.url ? 'active' : ''}">
+            <img src="${logo.url}" alt="${logo.nombre}">
+            <div class="logo-item-actions">
+                <button class="btn-logo-action btn-seleccionar" onclick="establecerLogo('${logo.url}')" title="Usar este logo">
+                    <i class="pi pi-check"></i>
+                </button>
+                <button class="btn-logo-action btn-eliminar" onclick="eliminarLogo('${logo.nombre}')" title="Eliminar">
+                    <i class="pi pi-trash"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function subirLogo() {
+    const input = document.getElementById('logoInput');
+    if (!input.files || !input.files[0]) return;
+    
+    const file = input.files[0];
+    
+    if (file.size > 50 * 1024 * 1024) {
+        showNotification('El archivo excede el tamaño máximo de 50MB', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('logo', file);
+    
+    try {
+        showLoading();
+        const token = sessionStorage.getItem('pharmacy_token');
+        const response = await fetch('/api/logos/subir', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('Logo subido correctamente', 'success');
+            await cargarLogos();
+            renderGaleriaLogos();
+        } else {
+            showNotification(data.mensaje || 'Error al subir logo', 'error');
+        }
+    } catch (error) {
+        showNotification('Error al subir el logo', 'error');
+    } finally {
+        hideLoading();
+        input.value = '';
+    }
+}
+
+async function establecerLogo(url) {
+    try {
+        showLoading();
+        await api.put('/logos/establecer', { logo: url });
+        logoActivo = url;
+        window.logoFarmacia = url;
+        showNotification('Logo establecido correctamente', 'success');
+        renderConfiguracion();
+        renderGaleriaLogos();
+        actualizarLogoSidebar();
+    } catch (error) {
+        showNotification('Error al establecer el logo', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function quitarLogoActivo() {
+    try {
+        showLoading();
+        await api.put('/logos/establecer', { logo: '' });
+        logoActivo = null;
+        window.logoFarmacia = null;
+        showNotification('Logo removido', 'success');
+        renderConfiguracion();
+        renderGaleriaLogos();
+        actualizarLogoSidebar();
+    } catch (error) {
+        showNotification('Error al quitar el logo', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function actualizarLogoSidebar() {
+    const logoContainer = document.querySelector('.sidebar-logo');
+    if (logoContainer) {
+        if (window.logoFarmacia) {
+            logoContainer.innerHTML = `<img src="${window.logoFarmacia}" alt="Logo" class="sidebar-logo-img">`;
+        } else {
+            logoContainer.innerHTML = `<i class="pi pi-plus"></i>`;
+        }
+    }
+}
+
+async function eliminarLogo(nombre) {
+    if (!confirm('¿Está seguro de eliminar este logo?')) return;
+    
+    try {
+        showLoading();
+        await api.delete(`/logos/${nombre}`);
+        showNotification('Logo eliminado correctamente', 'success');
+        await cargarLogos();
+        renderGaleriaLogos();
+        renderConfiguracion();
+        actualizarLogoSidebar();
+    } catch (error) {
+        showNotification('Error al eliminar el logo', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
 window.initConfiguracion = initConfiguracion;
 window.guardarConfiguracion = guardarConfiguracion;
 window.setTheme = setTheme;
+window.subirLogo = subirLogo;
+window.establecerLogo = establecerLogo;
+window.quitarLogoActivo = quitarLogoActivo;
+window.eliminarLogo = eliminarLogo;

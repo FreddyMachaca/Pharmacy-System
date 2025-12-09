@@ -35,6 +35,15 @@ const app = {
                 window.nombreFarmacia = 'Pharmacy System';
             }
         }
+        if (window.logoFarmacia === undefined) {
+            try {
+                const response = await fetch('/api/logos/activo');
+                const data = await response.json();
+                window.logoFarmacia = data.logo || null;
+            } catch (error) {
+                window.logoFarmacia = null;
+            }
+        }
         document.getElementById('login-container').classList.add('hidden');
         document.getElementById('main-container').classList.remove('hidden');
         renderMainLayout();
