@@ -52,6 +52,19 @@ __pycache__/
 venv/
 .venv/
 
+# Archivos del instalador
+installer/portable/mariadb/
+installer/portable/node/
+installer/output/
+installer/launcher/dist/
+installer/launcher/build/
+installer/launcher/*.spec
+installer/resources/icon.ico
+
+# Licencias generadas (privadas)
+installer/license_generator/*.txt
+installer/license_generator/serials/
+
 # Instalador generado
 *.exe
 !SistemaFarmacia.exe
