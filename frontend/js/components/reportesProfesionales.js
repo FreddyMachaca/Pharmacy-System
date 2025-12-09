@@ -299,12 +299,19 @@ function mostrarVistaPrevia(tipo, datos) {
                     <span class="summary-label">Promedio/Venta:</span>
                     <span class="summary-value">${formatMoney(datos.resumen.promedio_venta)}</span>
                 </div>
+                <div class="summary-item">
+                    <span class="summary-label">Clientes Atendidos:</span>
+                    <span class="summary-value">${datos.resumen.clientes_atendidos || 0}</span>
+                </div>
             </div>
+            
+            <h4 class="preview-section-title"><i class="pi pi-calendar"></i> Ventas por Día</h4>
             <table class="preview-table">
                 <thead>
                     <tr>
                         <th>Fecha</th>
                         <th>Cantidad Ventas</th>
+                        <th>Total Descuentos</th>
                         <th>Total</th>
                     </tr>
                 </thead>
@@ -313,11 +320,84 @@ function mostrarVistaPrevia(tipo, datos) {
                         <tr>
                             <td>${formatearFecha(v.fecha)}</td>
                             <td>${v.cantidad_ventas}</td>
+                            <td>${formatMoney(v.total_descuentos || 0)}</td>
                             <td>${formatMoney(v.total)}</td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            
+            ${datos.detalleProductos && datos.detalleProductos.length > 0 ? `
+                <h4 class="preview-section-title"><i class="pi pi-shopping-cart"></i> Detalle de Productos Vendidos</h4>
+                <table class="preview-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Cant.</th>
+                            <th>P. Unit.</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${datos.detalleProductos.slice(0, 15).map(d => `
+                            <tr>
+                                <td>${formatearFecha(d.fecha_venta)}</td>
+                                <td>${d.producto}</td>
+                                <td>${d.categoria || '-'}</td>
+                                <td>${d.cantidad}</td>
+                                <td>${formatMoney(d.precio_unitario)}</td>
+                                <td>${formatMoney(d.subtotal)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : ''}
+            
+            ${datos.ventasPorVendedor && datos.ventasPorVendedor.length > 0 ? `
+                <h4 class="preview-section-title"><i class="pi pi-users"></i> Ventas por Vendedor</h4>
+                <table class="preview-table">
+                    <thead>
+                        <tr>
+                            <th>Vendedor</th>
+                            <th>Ventas Realizadas</th>
+                            <th>Total Ventas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${datos.ventasPorVendedor.map(v => `
+                            <tr>
+                                <td>${v.vendedor}</td>
+                                <td>${v.num_ventas}</td>
+                                <td>${formatMoney(v.total_vendido)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : ''}
+            
+            ${datos.ventasPorCategoria && datos.ventasPorCategoria.length > 0 ? `
+                <h4 class="preview-section-title"><i class="pi pi-tags"></i> Ventas por Categoría</h4>
+                <table class="preview-table">
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Unidades Vendidas</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${datos.ventasPorCategoria.map(c => `
+                            <tr>
+                                <td>${c.categoria}</td>
+                                <td>${c.unidades_vendidas}</td>
+                                <td>${formatMoney(c.total_ventas)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : ''}
         `;
     } else if (tipo === 'inventario') {
         html += `
@@ -331,30 +411,74 @@ function mostrarVistaPrevia(tipo, datos) {
                     <span class="summary-value">${datos.resumen.productos_stock_bajo || 0}</span>
                 </div>
                 <div class="summary-item">
-                    <span class="summary-label">Valor Total:</span>
+                    <span class="summary-label">Sin Stock:</span>
+                    <span class="summary-value">${datos.resumen.productos_sin_stock || 0}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Valor Inventario:</span>
                     <span class="summary-value">${formatMoney(datos.resumen.valor_total_inventario)}</span>
                 </div>
+                <div class="summary-item">
+                    <span class="summary-label">Valor Venta Potencial:</span>
+                    <span class="summary-value">${formatMoney(datos.resumen.valor_total_venta)}</span>
+                </div>
             </div>
+            
+            <h4 class="preview-section-title"><i class="pi pi-box"></i> Listado de Productos</h4>
             <table class="preview-table">
                 <thead>
                     <tr>
                         <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Laboratorio</th>
                         <th>Stock</th>
                         <th>Stock Mín.</th>
-                        <th>Precio Venta</th>
+                        <th>Estado</th>
+                        <th>P. Compra</th>
+                        <th>P. Venta</th>
+                        <th>Margen %</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${datos.productos.slice(0, 10).map(p => `
+                    ${datos.productos.slice(0, 15).map(p => `
                         <tr>
                             <td>${p.nombre}</td>
+                            <td>${p.categoria || '-'}</td>
+                            <td>${p.laboratorio || '-'}</td>
                             <td>${p.stock_actual}</td>
                             <td>${p.stock_minimo}</td>
+                            <td><span class="badge ${p.estado_stock === 'Sin Stock' ? 'badge-danger' : (p.estado_stock === 'Stock Bajo' ? 'badge-warning' : 'badge-success')}">${p.estado_stock}</span></td>
+                            <td>${formatMoney(p.precio_compra)}</td>
                             <td>${formatMoney(p.precio_venta)}</td>
+                            <td>${p.margen_porcentaje || 0}%</td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            
+            ${datos.porCategoria && datos.porCategoria.length > 0 ? `
+                <h4 class="preview-section-title"><i class="pi pi-tags"></i> Inventario por Categoría</h4>
+                <table class="preview-table">
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Productos</th>
+                            <th>Stock Total</th>
+                            <th>Valor Inventario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${datos.porCategoria.map(c => `
+                            <tr>
+                                <td>${c.categoria}</td>
+                                <td>${c.total_productos}</td>
+                                <td>${c.stock_total}</td>
+                                <td>${formatMoney(c.valor_inventario)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : ''}
         `;
     } else if (tipo === 'vencimientos') {
         html += `
@@ -408,20 +532,34 @@ function mostrarVistaPrevia(tipo, datos) {
                     <span class="summary-label">Unidades Vendidas:</span>
                     <span class="summary-value">${datos.productosVendidos.reduce((sum, p) => sum + (parseInt(p.cantidad_vendida) || 0), 0)}</span>
                 </div>
+                <div class="summary-item">
+                    <span class="summary-label">Total Ventas:</span>
+                    <span class="summary-value">${formatMoney(datos.productosVendidos.reduce((sum, p) => sum + (parseFloat(p.total_ventas) || 0), 0))}</span>
+                </div>
             </div>
             <table class="preview-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Producto</th>
-                        <th>Cantidad Vendida</th>
-                        <th>Total Ventas</th>
+                        <th>Categoría</th>
+                        <th>Laboratorio</th>
+                        <th>P. Venta</th>
+                        <th>Cantidad</th>
+                        <th>Nº Ventas</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${datos.productosVendidos.slice(0, 10).map(p => `
+                    ${datos.productosVendidos.slice(0, 20).map((p, idx) => `
                         <tr>
+                            <td>${idx + 1}</td>
                             <td>${p.producto || p.nombre}</td>
+                            <td>${p.categoria || '-'}</td>
+                            <td>${p.laboratorio || '-'}</td>
+                            <td>${formatMoney(p.precio_venta || 0)}</td>
                             <td>${p.cantidad_vendida || 0}</td>
+                            <td>${p.num_ventas || 0}</td>
                             <td>${formatMoney(p.total_ventas || 0)}</td>
                         </tr>
                     `).join('')}
@@ -592,53 +730,177 @@ function generarPDFVentas(doc, datos) {
     doc.text(`Ingresos Totales: ${formatMoney(datos.resumen.ingresos_totales)}`, 75, 85);
     doc.text(`Promedio por Venta: ${formatMoney(datos.resumen.promedio_venta)}`, 135, 85);
     doc.text(`Productos Vendidos: ${datos.resumen.productos_vendidos || 0}`, 20, 91);
+    doc.text(`Clientes Atendidos: ${datos.resumen.clientes_atendidos || 0}`, 75, 91);
     
+    // Ventas por día
     const ventasData = datos.ventasDiarias.map(v => [
         formatearFecha(v.fecha),
         v.cantidad_ventas.toString(),
+        formatMoney(v.total_descuentos || 0),
         formatMoney(v.total)
     ]);
     
     doc.autoTable({
         startY: 100,
-        head: [['Fecha', 'Cantidad Ventas', 'Total']],
+        head: [['Fecha', 'Cant. Ventas', 'Descuentos', 'Total']],
         body: ventasData,
         theme: 'striped',
         headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
-        styles: { fontSize: 9, cellPadding: 3 },
+        styles: { fontSize: 8, cellPadding: 3 },
         columnStyles: {
-            0: { cellWidth: 60 },
-            1: { cellWidth: 50, halign: 'center' },
-            2: { cellWidth: 60, halign: 'right' }
+            0: { cellWidth: 45 },
+            1: { cellWidth: 35, halign: 'center' },
+            2: { cellWidth: 45, halign: 'right' },
+            3: { cellWidth: 45, halign: 'right' }
         }
     });
     
-    if (datos.productosMasVendidos && datos.productosMasVendidos.length > 0) {
-        const startY = doc.lastAutoTable.finalY + 10;
+    // Detalle de productos vendidos
+    if (datos.detalleProductos && datos.detalleProductos.length > 0) {
+        let startY = doc.lastAutoTable.finalY + 10;
+        
+        if (startY > 250) {
+            doc.addPage();
+            startY = 20;
+        }
         
         doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
-        doc.text('PRODUCTOS MÁS VENDIDOS', 20, startY);
+        doc.text('DETALLE DE PRODUCTOS VENDIDOS', 20, startY);
         
-        const productosData = datos.productosMasVendidos.slice(0, 10).map((p, i) => [
+        const detalleData = datos.detalleProductos.map(d => [
+            formatearFecha(d.fecha_venta),
+            d.producto.substring(0, 25),
+            d.categoria || '-',
+            d.cantidad.toString(),
+            formatMoney(d.precio_unitario),
+            formatMoney(d.subtotal)
+        ]);
+        
+        doc.autoTable({
+            startY: startY + 5,
+            head: [['Fecha', 'Producto', 'Categoría', 'Cant.', 'P. Unit.', 'Subtotal']],
+            body: detalleData,
+            theme: 'striped',
+            headStyles: { fillColor: [46, 204, 113], textColor: 255, fontStyle: 'bold' },
+            styles: { fontSize: 7, cellPadding: 2 },
+            columnStyles: {
+                0: { cellWidth: 25 },
+                1: { cellWidth: 55 },
+                2: { cellWidth: 30 },
+                3: { cellWidth: 18, halign: 'center' },
+                4: { cellWidth: 28, halign: 'right' },
+                5: { cellWidth: 28, halign: 'right' }
+            }
+        });
+    }
+    
+    // Productos más vendidos
+    if (datos.productosMasVendidos && datos.productosMasVendidos.length > 0) {
+        let startY = doc.lastAutoTable.finalY + 10;
+        
+        if (startY > 250) {
+            doc.addPage();
+            startY = 20;
+        }
+        
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text('PRODUCTOS MÁS VENDIDOS (TOP 20)', 20, startY);
+        
+        const productosData = datos.productosMasVendidos.slice(0, 20).map((p, i) => [
             (i + 1).toString(),
-            p.nombre,
+            p.nombre.substring(0, 30),
+            p.categoria || '-',
             p.cantidad_vendida.toString(),
+            (p.num_ventas || 0).toString(),
             formatMoney(p.total_vendido)
         ]);
         
         doc.autoTable({
             startY: startY + 5,
-            head: [['#', 'Producto', 'Cantidad', 'Total']],
+            head: [['#', 'Producto', 'Categoría', 'Cantidad', 'Nº Ventas', 'Total']],
             body: productosData,
             theme: 'striped',
             headStyles: { fillColor: [52, 152, 219], textColor: 255, fontStyle: 'bold' },
+            styles: { fontSize: 8, cellPadding: 2 },
+            columnStyles: {
+                0: { cellWidth: 12, halign: 'center' },
+                1: { cellWidth: 60 },
+                2: { cellWidth: 32 },
+                3: { cellWidth: 25, halign: 'center' },
+                4: { cellWidth: 25, halign: 'center' },
+                5: { cellWidth: 30, halign: 'right' }
+            }
+        });
+    }
+    
+    // Ventas por vendedor
+    if (datos.ventasPorVendedor && datos.ventasPorVendedor.length > 0) {
+        let startY = doc.lastAutoTable.finalY + 10;
+        
+        if (startY > 250) {
+            doc.addPage();
+            startY = 20;
+        }
+        
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text('VENTAS POR VENDEDOR', 20, startY);
+        
+        const vendedorData = datos.ventasPorVendedor.map(v => [
+            v.vendedor,
+            v.num_ventas.toString(),
+            formatMoney(v.total_vendido)
+        ]);
+        
+        doc.autoTable({
+            startY: startY + 5,
+            head: [['Vendedor', 'Nº Ventas', 'Total Vendido']],
+            body: vendedorData,
+            theme: 'striped',
+            headStyles: { fillColor: [155, 89, 182], textColor: 255, fontStyle: 'bold' },
             styles: { fontSize: 9, cellPadding: 3 },
             columnStyles: {
-                0: { cellWidth: 15, halign: 'center' },
-                1: { cellWidth: 90 },
+                0: { cellWidth: 80 },
+                1: { cellWidth: 45, halign: 'center' },
+                2: { cellWidth: 55, halign: 'right' }
+            }
+        });
+    }
+    
+    // Ventas por categoría
+    if (datos.ventasPorCategoria && datos.ventasPorCategoria.length > 0) {
+        let startY = doc.lastAutoTable.finalY + 10;
+        
+        if (startY > 250) {
+            doc.addPage();
+            startY = 20;
+        }
+        
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text('VENTAS POR CATEGORÍA', 20, startY);
+        
+        const categoriaData = datos.ventasPorCategoria.map(c => [
+            c.categoria,
+            c.num_ventas.toString(),
+            c.unidades_vendidas.toString(),
+            formatMoney(c.total_ventas)
+        ]);
+        
+        doc.autoTable({
+            startY: startY + 5,
+            head: [['Categoría', 'Nº Ventas', 'Unidades', 'Total']],
+            body: categoriaData,
+            theme: 'striped',
+            headStyles: { fillColor: [230, 126, 34], textColor: 255, fontStyle: 'bold' },
+            styles: { fontSize: 9, cellPadding: 3 },
+            columnStyles: {
+                0: { cellWidth: 70 },
+                1: { cellWidth: 35, halign: 'center' },
                 2: { cellWidth: 35, halign: 'center' },
-                3: { cellWidth: 40, halign: 'right' }
+                3: { cellWidth: 45, halign: 'right' }
             }
         });
     }
@@ -658,51 +920,60 @@ function generarPDFInventario(doc, datos) {
     const formatMoney = (val) => `Bs. ${parseFloat(val || 0).toFixed(2)}`;
     
     doc.setFillColor(240, 240, 240);
-    doc.rect(15, 65, 180, 25, 'F');
+    doc.rect(15, 65, 180, 28, 'F');
     
     doc.setFontSize(11);
     doc.setFont(undefined, 'bold');
     doc.text('RESUMEN DE INVENTARIO', 20, 73);
     
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
     doc.text(`Total de Productos: ${datos.resumen.total_productos || 0}`, 20, 80);
-    doc.text(`Productos con Stock Bajo: ${datos.resumen.productos_stock_bajo || 0}`, 75, 80);
-    doc.text(`Productos Sin Stock: ${datos.resumen.productos_sin_stock || 0}`, 135, 80);
-    doc.text(`Valor Total del Inventario: ${formatMoney(datos.resumen.valor_total_inventario)}`, 20, 86);
+    doc.text(`Total Unidades: ${datos.resumen.total_unidades || 0}`, 70, 80);
+    doc.text(`Stock Bajo: ${datos.resumen.productos_stock_bajo || 0}`, 120, 80);
+    doc.text(`Sin Stock: ${datos.resumen.productos_sin_stock || 0}`, 160, 80);
+    doc.text(`Valor Inventario: ${formatMoney(datos.resumen.valor_total_inventario)}`, 20, 88);
+    doc.text(`Valor Venta Potencial: ${formatMoney(datos.resumen.valor_total_venta)}`, 90, 88);
     
+    // Listado de productos
     const inventarioData = datos.productos.map(p => {
         let estado = 'Normal';
         if (p.stock_actual === 0) estado = 'Sin Stock';
         else if (p.stock_actual <= p.stock_minimo) estado = 'Bajo';
         
         return [
-            p.nombre,
+            p.nombre.substring(0, 25),
             p.categoria || '-',
+            p.laboratorio || '-',
             p.stock_actual.toString(),
             p.stock_minimo.toString(),
             estado,
-            formatMoney(p.precio_venta)
+            formatMoney(p.precio_compra),
+            formatMoney(p.precio_venta),
+            `${p.margen_porcentaje || 0}%`
         ];
     });
     
     doc.autoTable({
-        startY: 95,
-        head: [['Producto', 'Categoría', 'Stock', 'Mín.', 'Estado', 'Precio']],
+        startY: 98,
+        head: [['Producto', 'Categoría', 'Lab.', 'Stock', 'Mín.', 'Estado', 'P. Compra', 'P. Venta', 'Margen']],
         body: inventarioData,
         theme: 'striped',
         headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
-        styles: { fontSize: 8, cellPadding: 2 },
+        styles: { fontSize: 7, cellPadding: 2 },
         columnStyles: {
-            0: { cellWidth: 60 },
-            1: { cellWidth: 35 },
-            2: { cellWidth: 20, halign: 'center' },
-            3: { cellWidth: 20, halign: 'center' },
-            4: { cellWidth: 25, halign: 'center' },
-            5: { cellWidth: 25, halign: 'right' }
+            0: { cellWidth: 35 },
+            1: { cellWidth: 22 },
+            2: { cellWidth: 18 },
+            3: { cellWidth: 14, halign: 'center' },
+            4: { cellWidth: 14, halign: 'center' },
+            5: { cellWidth: 18, halign: 'center' },
+            6: { cellWidth: 22, halign: 'right' },
+            7: { cellWidth: 22, halign: 'right' },
+            8: { cellWidth: 18, halign: 'right' }
         },
         didParseCell: function(data) {
-            if (data.column.index === 4 && data.section === 'body') {
+            if (data.column.index === 5 && data.section === 'body') {
                 if (data.cell.text[0] === 'Sin Stock') {
                     data.cell.styles.textColor = [220, 38, 38];
                     data.cell.styles.fontStyle = 'bold';
@@ -713,6 +984,42 @@ function generarPDFInventario(doc, datos) {
             }
         }
     });
+    
+    // Inventario por categoría
+    if (datos.porCategoria && datos.porCategoria.length > 0) {
+        let startY = doc.lastAutoTable.finalY + 10;
+        
+        if (startY > 250) {
+            doc.addPage();
+            startY = 20;
+        }
+        
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text('INVENTARIO POR CATEGORÍA', 20, startY);
+        
+        const categoriaData = datos.porCategoria.map(c => [
+            c.categoria,
+            c.total_productos.toString(),
+            c.stock_total.toString(),
+            formatMoney(c.valor_inventario)
+        ]);
+        
+        doc.autoTable({
+            startY: startY + 5,
+            head: [['Categoría', 'Productos', 'Stock Total', 'Valor Inventario']],
+            body: categoriaData,
+            theme: 'striped',
+            headStyles: { fillColor: [46, 204, 113], textColor: 255, fontStyle: 'bold' },
+            styles: { fontSize: 9, cellPadding: 3 },
+            columnStyles: {
+                0: { cellWidth: 65 },
+                1: { cellWidth: 35, halign: 'center' },
+                2: { cellWidth: 35, halign: 'center' },
+                3: { cellWidth: 45, halign: 'right' }
+            }
+        });
+    }
     
     agregarPiePagina(doc);
 }
@@ -815,37 +1122,61 @@ function generarPDFVencimientos(doc, datos) {
 }
 
 function generarPDFProductosVendidos(doc, datos) {
-    doc.setFontSize(14);
+    doc.setFontSize(16);
     doc.setFont(undefined, 'bold');
-    doc.setTextColor(41, 128, 185);
-    doc.text('PRODUCTOS MÁS VENDIDOS', 105, 70, { align: 'center' });
-    
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Período: ${formatearFecha(datos.fechaInicio)} - ${formatearFecha(datos.fechaFin)}`, 105, 78, { align: 'center' });
+    doc.text('PRODUCTOS MÁS VENDIDOS', 105, 50, { align: 'center' });
     
     doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Total de productos vendidos: ${datos.productosVendidos.length}`, 20, 92);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Período: ${formatearFecha(datos.fechaInicio)} al ${formatearFecha(datos.fechaFin)}`, 105, 58, { align: 'center' });
+    doc.text(`Fecha de generación: ${new Date().toLocaleDateString('es-BO')}`, 105, 64, { align: 'center' });
     
-    const productosData = datos.productosVendidos.map(p => [
-        p.producto,
-        p.cantidad_vendida ? p.cantidad_vendida.toString() : '0',
+    const formatMoney = (val) => `Bs. ${parseFloat(val || 0).toFixed(2)}`;
+    
+    // Resumen
+    const totalUnidades = datos.productosVendidos.reduce((sum, p) => sum + (parseInt(p.cantidad_vendida) || 0), 0);
+    const totalVentas = datos.productosVendidos.reduce((sum, p) => sum + (parseFloat(p.total_ventas) || 0), 0);
+    
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, 70, 180, 20, 'F');
+    
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('RESUMEN', 20, 78);
+    
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Total Productos: ${datos.productosVendidos.length}`, 20, 85);
+    doc.text(`Unidades Vendidas: ${totalUnidades}`, 75, 85);
+    doc.text(`Total Ventas: ${formatMoney(totalVentas)}`, 135, 85);
+    
+    const productosData = datos.productosVendidos.slice(0, 20).map((p, idx) => [
+        (idx + 1).toString(),
+        (p.producto || p.nombre).substring(0, 28),
+        p.categoria || '-',
+        p.laboratorio || '-',
+        formatMoney(p.precio_venta || 0),
+        (p.cantidad_vendida || 0).toString(),
+        (p.num_ventas || 0).toString(),
         formatMoney(p.total_ventas || 0)
     ]);
     
     doc.autoTable({
-        startY: 98,
-        head: [['Producto', 'Cantidad Vendida', 'Total Ventas']],
+        startY: 95,
+        head: [['#', 'Producto', 'Categoría', 'Laboratorio', 'P. Venta', 'Cant.', 'Nº Ventas', 'Total']],
         body: productosData,
         theme: 'striped',
         headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
-        styles: { fontSize: 9, cellPadding: 3 },
+        styles: { fontSize: 7, cellPadding: 2 },
         columnStyles: {
-            0: { cellWidth: 100 },
-            1: { cellWidth: 40, halign: 'center' },
-            2: { cellWidth: 45, halign: 'right' }
+            0: { cellWidth: 10, halign: 'center' },
+            1: { cellWidth: 42 },
+            2: { cellWidth: 25 },
+            3: { cellWidth: 25 },
+            4: { cellWidth: 22, halign: 'right' },
+            5: { cellWidth: 16, halign: 'center' },
+            6: { cellWidth: 20, halign: 'center' },
+            7: { cellWidth: 25, halign: 'right' }
         }
     });
     
@@ -984,7 +1315,8 @@ async function descargarExcel() {
             ['Total Ventas', datosReporte.resumen.total_ventas || 0],
             ['Ingresos Totales', `Bs. ${parseFloat(datosReporte.resumen.ingresos_totales || 0).toFixed(2)}`],
             ['Promedio por Venta', `Bs. ${parseFloat(datosReporte.resumen.promedio_venta || 0).toFixed(2)}`],
-            ['Productos Vendidos', datosReporte.resumen.productos_vendidos || 0]
+            ['Productos Vendidos', datosReporte.resumen.productos_vendidos || 0],
+            ['Clientes Atendidos', datosReporte.resumen.clientes_atendidos || 0]
         ];
         
         resumenData.forEach((row, idx) => {
@@ -1001,7 +1333,7 @@ async function descargarExcel() {
             worksheet.getCell(`B${rowNum}`).alignment = { horizontal: 'right' };
         });
         
-        worksheet.mergeCells('A15:C15');
+        worksheet.mergeCells('A15:D15');
         worksheet.getCell('A15').value = 'VENTAS POR DÍA';
         worksheet.getCell('A15').font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
         worksheet.getCell('A15').alignment = { horizontal: 'center' };
@@ -1013,7 +1345,7 @@ async function descargarExcel() {
         worksheet.getRow(15).height = 20;
         
         const headerRow = worksheet.getRow(16);
-        headerRow.values = ['Fecha', 'Cantidad Ventas', 'Total (Bs.)'];
+        headerRow.values = ['Fecha', 'Cant. Ventas', 'Descuentos (Bs.)', 'Total (Bs.)'];
         headerRow.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
         headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
         headerRow.fill = {
@@ -1029,6 +1361,7 @@ async function descargarExcel() {
             row.values = [
                 formatearFecha(venta.fecha),
                 venta.cantidad_ventas,
+                parseFloat(venta.total_descuentos || 0).toFixed(2),
                 parseFloat(venta.total || 0).toFixed(2)
             ];
             
@@ -1045,7 +1378,7 @@ async function descargarExcel() {
                 };
                 if (colNum === 1) cell.alignment = { horizontal: 'center' };
                 if (colNum === 2) cell.alignment = { horizontal: 'center' };
-                if (colNum === 3) {
+                if (colNum >= 3) {
                     cell.alignment = { horizontal: 'right' };
                     cell.numFmt = '#,##0.00';
                 }
@@ -1055,35 +1388,161 @@ async function descargarExcel() {
         worksheet.columns = [
             { width: 25 },
             { width: 20 },
-            { width: 20 }
-        ];
-        
-        worksheet.columns = [
-            { width: 25 },
             { width: 20 },
             { width: 20 }
         ];
         
+        // Hoja de detalle de productos
+        if (datosReporte.detalleProductos && datosReporte.detalleProductos.length > 0) {
+            const wsDetalle = workbook.addWorksheet('Detalle Productos');
+            
+            wsDetalle.mergeCells('A1:F1');
+            wsDetalle.getCell('A1').value = 'DETALLE DE PRODUCTOS VENDIDOS';
+            wsDetalle.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FF2980B9' } };
+            wsDetalle.getCell('A1').alignment = { horizontal: 'center' };
+            wsDetalle.getRow(1).height = 25;
+            
+            const headerDetalle = wsDetalle.getRow(3);
+            headerDetalle.values = ['Fecha', 'Producto', 'Categoría', 'Cantidad', 'P. Unitario', 'Subtotal'];
+            headerDetalle.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
+            headerDetalle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2ECC71' } };
+            headerDetalle.height = 18;
+            
+            datosReporte.detalleProductos.forEach((d, idx) => {
+                const row = wsDetalle.getRow(4 + idx);
+                row.values = [
+                    formatearFecha(d.fecha_venta),
+                    d.producto,
+                    d.categoria || '-',
+                    d.cantidad,
+                    parseFloat(d.precio_unitario || 0).toFixed(2),
+                    parseFloat(d.subtotal || 0).toFixed(2)
+                ];
+                const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8F9FA';
+                row.eachCell((cell) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+                });
+            });
+            
+            wsDetalle.columns = [
+                { width: 15 }, { width: 40 }, { width: 20 }, { width: 12 }, { width: 15 }, { width: 15 }
+            ];
+        }
+        
+        // Hoja de productos más vendidos
+        if (datosReporte.productosMasVendidos && datosReporte.productosMasVendidos.length > 0) {
+            const wsProd = workbook.addWorksheet('Productos Más Vendidos');
+            
+            wsProd.mergeCells('A1:G1');
+            wsProd.getCell('A1').value = 'PRODUCTOS MÁS VENDIDOS';
+            wsProd.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FF2980B9' } };
+            wsProd.getCell('A1').alignment = { horizontal: 'center' };
+            wsProd.getRow(1).height = 25;
+            
+            const headerProd = wsProd.getRow(3);
+            headerProd.values = ['#', 'Producto', 'Categoría', 'Laboratorio', 'Cantidad', 'Nº Ventas', 'Total'];
+            headerProd.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
+            headerProd.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF3498DB' } };
+            headerProd.height = 18;
+            
+            datosReporte.productosMasVendidos.forEach((p, idx) => {
+                const row = wsProd.getRow(4 + idx);
+                row.values = [
+                    idx + 1,
+                    p.nombre,
+                    p.categoria || '-',
+                    p.laboratorio || '-',
+                    p.cantidad_vendida || 0,
+                    p.num_ventas || 0,
+                    parseFloat(p.total_vendido || 0).toFixed(2)
+                ];
+                const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8F9FA';
+                row.eachCell((cell) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+                });
+            });
+            
+            wsProd.columns = [
+                { width: 8 }, { width: 35 }, { width: 20 }, { width: 20 }, { width: 12 }, { width: 12 }, { width: 15 }
+            ];
+        }
+        
+        // Hoja de ventas por vendedor
+        if (datosReporte.ventasPorVendedor && datosReporte.ventasPorVendedor.length > 0) {
+            const wsVend = workbook.addWorksheet('Por Vendedor');
+            
+            wsVend.mergeCells('A1:C1');
+            wsVend.getCell('A1').value = 'VENTAS POR VENDEDOR';
+            wsVend.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FF9B59B6' } };
+            wsVend.getCell('A1').alignment = { horizontal: 'center' };
+            wsVend.getRow(1).height = 25;
+            
+            const headerVend = wsVend.getRow(3);
+            headerVend.values = ['Vendedor', 'Nº Ventas', 'Total Vendido'];
+            headerVend.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
+            headerVend.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF9B59B6' } };
+            headerVend.height = 18;
+            
+            datosReporte.ventasPorVendedor.forEach((v, idx) => {
+                const row = wsVend.getRow(4 + idx);
+                row.values = [v.vendedor, v.num_ventas, parseFloat(v.total_vendido || 0).toFixed(2)];
+                const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8F9FA';
+                row.eachCell((cell) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+                });
+            });
+            
+            wsVend.columns = [{ width: 30 }, { width: 15 }, { width: 18 }];
+        }
+        
+        // Hoja de ventas por categoría
+        if (datosReporte.ventasPorCategoria && datosReporte.ventasPorCategoria.length > 0) {
+            const wsCat = workbook.addWorksheet('Por Categoría');
+            
+            wsCat.mergeCells('A1:D1');
+            wsCat.getCell('A1').value = 'VENTAS POR CATEGORÍA';
+            wsCat.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FFE67E22' } };
+            wsCat.getCell('A1').alignment = { horizontal: 'center' };
+            wsCat.getRow(1).height = 25;
+            
+            const headerCat = wsCat.getRow(3);
+            headerCat.values = ['Categoría', 'Nº Ventas', 'Unidades', 'Total'];
+            headerCat.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
+            headerCat.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE67E22' } };
+            headerCat.height = 18;
+            
+            datosReporte.ventasPorCategoria.forEach((c, idx) => {
+                const row = wsCat.getRow(4 + idx);
+                row.values = [c.categoria, c.num_ventas, c.unidades_vendidas, parseFloat(c.total_ventas || 0).toFixed(2)];
+                const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8F9FA';
+                row.eachCell((cell) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+                });
+            });
+            
+            wsCat.columns = [{ width: 25 }, { width: 15 }, { width: 15 }, { width: 18 }];
+        }
+        
     } else if (reporteActual === 'inventario') {
         const worksheet = workbook.addWorksheet('Inventario');
         
-        worksheet.mergeCells('A1:F1');
+        worksheet.mergeCells('A1:I1');
         worksheet.getCell('A1').value = configFarmacia.nombre;
         worksheet.getCell('A1').font = { bold: true, size: 16, color: { argb: 'FF2980B9' } };
         worksheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
         worksheet.getRow(1).height = 25;
         
-        worksheet.mergeCells('A2:F2');
+        worksheet.mergeCells('A2:I2');
         worksheet.getCell('A2').value = configFarmacia.direccion;
         worksheet.getCell('A2').font = { size: 11 };
         worksheet.getCell('A2').alignment = { horizontal: 'center' };
         
-        worksheet.mergeCells('A3:F3');
+        worksheet.mergeCells('A3:I3');
         worksheet.getCell('A3').value = `Tel: ${configFarmacia.telefono} | NIT: ${configFarmacia.nit}`;
         worksheet.getCell('A3').font = { size: 10 };
         worksheet.getCell('A3').alignment = { horizontal: 'center' };
         
-        worksheet.mergeCells('A5:F5');
+        worksheet.mergeCells('A5:I5');
         worksheet.getCell('A5').value = 'REPORTE DE INVENTARIO';
         worksheet.getCell('A5').font = { bold: true, size: 14, color: { argb: 'FF2980B9' } };
         worksheet.getCell('A5').alignment = { horizontal: 'center' };
@@ -1094,7 +1553,7 @@ async function descargarExcel() {
         };
         worksheet.getRow(5).height = 22;
         
-        worksheet.mergeCells('A6:F6');
+        worksheet.mergeCells('A6:I6');
         worksheet.getCell('A6').value = `Fecha: ${new Date().toLocaleDateString('es-BO')}`;
         worksheet.getCell('A6').font = { size: 10, italic: true };
         worksheet.getCell('A6').alignment = { horizontal: 'center' };
@@ -1112,9 +1571,11 @@ async function descargarExcel() {
         
         const resumenData = [
             ['Total Productos', datosReporte.resumen.total_productos || 0],
+            ['Total Unidades', datosReporte.resumen.total_unidades || 0],
             ['Stock Bajo', datosReporte.resumen.productos_stock_bajo || 0],
             ['Sin Stock', datosReporte.resumen.productos_sin_stock || 0],
-            ['Valor Total', `Bs. ${parseFloat(datosReporte.resumen.valor_total_inventario || 0).toFixed(2)}`]
+            ['Valor Inventario', `Bs. ${parseFloat(datosReporte.resumen.valor_total_inventario || 0).toFixed(2)}`],
+            ['Valor Venta Pot.', `Bs. ${parseFloat(datosReporte.resumen.valor_total_venta || 0).toFixed(2)}`]
         ];
         
         resumenData.forEach((row, idx) => {
@@ -1131,19 +1592,19 @@ async function descargarExcel() {
             worksheet.getCell(`B${rowNum}`).alignment = { horizontal: 'right' };
         });
         
-        worksheet.mergeCells('A14:F14');
-        worksheet.getCell('A14').value = 'DETALLE DE INVENTARIO';
-        worksheet.getCell('A14').font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
-        worksheet.getCell('A14').alignment = { horizontal: 'center' };
-        worksheet.getCell('A14').fill = {
+        worksheet.mergeCells('A16:I16');
+        worksheet.getCell('A16').value = 'DETALLE DE INVENTARIO';
+        worksheet.getCell('A16').font = { bold: true, size: 11, color: { argb: 'FFFFFFFF' } };
+        worksheet.getCell('A16').alignment = { horizontal: 'center' };
+        worksheet.getCell('A16').fill = {
             type: 'pattern',
             pattern: 'solid',
             fgColor: { argb: 'FF2980B9' }
         };
-        worksheet.getRow(14).height = 20;
+        worksheet.getRow(16).height = 20;
         
-        const headerRow = worksheet.getRow(15);
-        headerRow.values = ['Producto', 'Categoría', 'Stock', 'Stock Mín.', 'Estado', 'Precio (Bs.)'];
+        const headerRow = worksheet.getRow(17);
+        headerRow.values = ['Producto', 'Categoría', 'Laboratorio', 'Stock', 'Stock Mín.', 'Estado', 'P. Compra', 'P. Venta', 'Margen %'];
         headerRow.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
         headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
         headerRow.fill = {
@@ -1158,20 +1619,23 @@ async function descargarExcel() {
             if (producto.stock_actual === 0) estado = 'Sin Stock';
             else if (producto.stock_actual <= producto.stock_minimo) estado = 'Bajo';
             
-            const rowNum = 16 + idx;
+            const rowNum = 18 + idx;
             const row = worksheet.getRow(rowNum);
             row.values = [
                 producto.nombre,
                 producto.categoria || '-',
+                producto.laboratorio || '-',
                 producto.stock_actual,
                 producto.stock_minimo,
                 estado,
-                parseFloat(producto.precio_venta || 0).toFixed(2)
+                parseFloat(producto.precio_compra || 0).toFixed(2),
+                parseFloat(producto.precio_venta || 0).toFixed(2),
+                `${producto.margen_porcentaje || 0}%`
             ];
             
             const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8F9FA';
             row.eachCell((cell, colNum) => {
-                cell.font = { size: 10 };
+                cell.font = { size: 9 };
                 cell.fill = {
                     type: 'pattern',
                     pattern: 'solid',
@@ -1181,14 +1645,13 @@ async function descargarExcel() {
                     bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } }
                 };
                 
-                if (colNum >= 2 && colNum <= 4) cell.alignment = { horizontal: 'center' };
-                if (colNum === 6) {
+                if (colNum >= 4 && colNum <= 5) cell.alignment = { horizontal: 'center' };
+                if (colNum >= 7 && colNum <= 9) {
                     cell.alignment = { horizontal: 'right' };
-                    cell.numFmt = '#,##0.00';
                 }
                 
-                if (colNum === 5) {
-                    cell.font = { size: 10, bold: true };
+                if (colNum === 6) {
+                    cell.font = { size: 9, bold: true };
                     cell.alignment = { horizontal: 'center' };
                     if (estado === 'Sin Stock') {
                         cell.font.color = { argb: 'FFDC2626' };
@@ -1212,13 +1675,44 @@ async function descargarExcel() {
         });
         
         worksheet.columns = [
-            { width: 35 },
-            { width: 20 },
+            { width: 30 },
+            { width: 18 },
+            { width: 18 },
+            { width: 10 },
+            { width: 10 },
             { width: 12 },
             { width: 12 },
-            { width: 15 },
-            { width: 15 }
+            { width: 12 },
+            { width: 10 }
         ];
+        
+        // Hoja de inventario por categoría
+        if (datosReporte.porCategoria && datosReporte.porCategoria.length > 0) {
+            const wsCat = workbook.addWorksheet('Por Categoría');
+            
+            wsCat.mergeCells('A1:D1');
+            wsCat.getCell('A1').value = 'INVENTARIO POR CATEGORÍA';
+            wsCat.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FF2ECC71' } };
+            wsCat.getCell('A1').alignment = { horizontal: 'center' };
+            wsCat.getRow(1).height = 25;
+            
+            const headerCat = wsCat.getRow(3);
+            headerCat.values = ['Categoría', 'Productos', 'Stock Total', 'Valor Inventario'];
+            headerCat.font = { bold: true, size: 10, color: { argb: 'FFFFFFFF' } };
+            headerCat.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2ECC71' } };
+            headerCat.height = 18;
+            
+            datosReporte.porCategoria.forEach((c, idx) => {
+                const row = wsCat.getRow(4 + idx);
+                row.values = [c.categoria, c.total_productos, c.stock_total, parseFloat(c.valor_inventario || 0).toFixed(2)];
+                const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF8F9FA';
+                row.eachCell((cell) => {
+                    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+                });
+            });
+            
+            wsCat.columns = [{ width: 25 }, { width: 15 }, { width: 15 }, { width: 20 }];
+        }
         
     } else if (reporteActual === 'vencimientos') {
         const worksheet = workbook.addWorksheet('Vencimientos');

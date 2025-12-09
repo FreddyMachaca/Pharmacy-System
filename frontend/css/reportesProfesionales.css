@@ -442,6 +442,23 @@
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 1.5rem;
+    font-size: 0.8rem;
+}
+
+.preview-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 1.5rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.preview-section-title i {
+    color: var(--primary-color);
 }
 
 .preview-table thead {
@@ -745,6 +762,15 @@
 [data-theme="dark"] .preview-table th {
     background: var(--bg-table-header);
     color: var(--text-primary);
+}
+
+[data-theme="dark"] .preview-section-title {
+    color: var(--text-primary);
+    border-color: var(--azul-primario);
+}
+
+[data-theme="dark"] .preview-section-title i {
+    color: var(--azul-primario);
 }
 
 [data-theme="dark"] .preview-table td {

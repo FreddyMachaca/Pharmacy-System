@@ -6,13 +6,64 @@ const ReporteModel = {
             SELECT 
                 DATE(fecha_venta) as fecha,
                 COUNT(*) as cantidad_ventas,
-                SUM(total) as total_ventas,
+                SUM(total) as total,
                 SUM(descuento) as total_descuentos
             FROM ventas 
             WHERE estado = 'Completada' 
                 AND DATE(fecha_venta) BETWEEN ? AND ?
             GROUP BY DATE(fecha_venta)
             ORDER BY fecha DESC
+        `, [fechaInicio, fechaFin]);
+        return rows;
+    },
+
+    async ventasDetalladas(fechaInicio, fechaFin) {
+        const [rows] = await pool.execute(`
+            SELECT 
+                v.id as venta_id,
+                v.fecha_venta,
+                v.subtotal,
+                v.descuento,
+                v.total,
+                v.metodo_pago,
+                COALESCE(c.nombre, 'Cliente General') as cliente,
+                c.numero_documento as cliente_documento,
+                u.nombre as vendedor,
+                (SELECT COUNT(*) FROM detalle_ventas WHERE venta_id = v.id) as num_productos
+            FROM ventas v
+            LEFT JOIN clientes c ON v.cliente_id = c.id
+            LEFT JOIN usuarios u ON v.usuario_id = u.id
+            WHERE v.estado = 'Completada' 
+                AND DATE(v.fecha_venta) BETWEEN ? AND ?
+            ORDER BY v.fecha_venta DESC
+        `, [fechaInicio, fechaFin]);
+        return rows;
+    },
+
+    async detalleVentasProductos(fechaInicio, fechaFin) {
+        const [rows] = await pool.execute(`
+            SELECT 
+                v.id as venta_id,
+                v.fecha_venta,
+                p.nombre as producto,
+                p.codigo_barras,
+                c.nombre as categoria,
+                lab.nombre as laboratorio,
+                dv.cantidad,
+                dv.precio_unitario,
+                dv.subtotal,
+                COALESCE(cl.nombre, 'Cliente General') as cliente,
+                u.nombre as vendedor
+            FROM detalle_ventas dv
+            INNER JOIN ventas v ON dv.venta_id = v.id
+            INNER JOIN productos p ON dv.producto_id = p.id
+            LEFT JOIN categorias c ON p.categoria_id = c.id
+            LEFT JOIN laboratorios lab ON p.laboratorio_id = lab.id
+            LEFT JOIN clientes cl ON v.cliente_id = cl.id
+            LEFT JOIN usuarios u ON v.usuario_id = u.id
+            WHERE v.estado = 'Completada' 
+                AND DATE(v.fecha_venta) BETWEEN ? AND ?
+            ORDER BY v.fecha_venta DESC, v.id
         `, [fechaInicio, fechaFin]);
         return rows;
     },
@@ -24,7 +75,9 @@ const ReporteModel = {
                 COALESCE(SUM(v.total), 0) as ingresos_totales,
                 COALESCE(AVG(v.total), 0) as promedio_venta,
                 COALESCE(SUM(v.descuento), 0) as descuentos_totales,
-                COALESCE(SUM(dv.cantidad), 0) as productos_vendidos
+                COALESCE(SUM(dv.cantidad), 0) as productos_vendidos,
+                COUNT(DISTINCT v.cliente_id) as clientes_atendidos,
+                COUNT(DISTINCT dv.producto_id) as productos_distintos
             FROM ventas v
             LEFT JOIN detalle_ventas dv ON v.id = dv.venta_id
             WHERE v.estado = 'Completada' 
@@ -39,16 +92,20 @@ const ReporteModel = {
                 p.id,
                 p.nombre,
                 p.codigo_barras,
+                c.nombre as categoria,
                 l.nombre as laboratorio,
+                p.precio_venta,
                 SUM(dv.cantidad) as cantidad_vendida,
-                SUM(dv.subtotal) as total_vendido
+                SUM(dv.subtotal) as total_vendido,
+                COUNT(DISTINCT dv.venta_id) as num_ventas
             FROM detalle_ventas dv
             INNER JOIN productos p ON dv.producto_id = p.id
+            LEFT JOIN categorias c ON p.categoria_id = c.id
             LEFT JOIN laboratorios l ON p.laboratorio_id = l.id
             INNER JOIN ventas v ON dv.venta_id = v.id
             WHERE v.estado = 'Completada' 
                 AND DATE(v.fecha_venta) BETWEEN ? AND ?
-            GROUP BY p.id, p.nombre, p.codigo_barras, l.nombre
+            GROUP BY p.id, p.nombre, p.codigo_barras, c.nombre, l.nombre, p.precio_venta
             ORDER BY cantidad_vendida DESC
             LIMIT ${parseInt(limite)}
         `, [fechaInicio, fechaFin]);
@@ -60,12 +117,50 @@ const ReporteModel = {
             SELECT 
                 metodo_pago,
                 COUNT(*) as cantidad,
-                SUM(total) as total
+                SUM(total) as total,
+                AVG(total) as promedio
             FROM ventas 
             WHERE estado = 'Completada' 
                 AND DATE(fecha_venta) BETWEEN ? AND ?
             GROUP BY metodo_pago
             ORDER BY total DESC
+        `, [fechaInicio, fechaFin]);
+        return rows;
+    },
+
+    async ventasPorVendedor(fechaInicio, fechaFin) {
+        const [rows] = await pool.execute(`
+            SELECT 
+                u.id,
+                u.nombre as vendedor,
+                COUNT(v.id) as num_ventas,
+                SUM(v.total) as total_vendido,
+                AVG(v.total) as promedio_venta
+            FROM ventas v
+            INNER JOIN usuarios u ON v.usuario_id = u.id
+            WHERE v.estado = 'Completada' 
+                AND DATE(v.fecha_venta) BETWEEN ? AND ?
+            GROUP BY u.id, u.nombre
+            ORDER BY total_vendido DESC
+        `, [fechaInicio, fechaFin]);
+        return rows;
+    },
+
+    async ventasPorCategoria(fechaInicio, fechaFin) {
+        const [rows] = await pool.execute(`
+            SELECT 
+                COALESCE(c.nombre, 'Sin Categoría') as categoria,
+                COUNT(DISTINCT dv.venta_id) as num_ventas,
+                SUM(dv.cantidad) as unidades_vendidas,
+                SUM(dv.subtotal) as total_ventas
+            FROM detalle_ventas dv
+            INNER JOIN ventas v ON dv.venta_id = v.id
+            INNER JOIN productos p ON dv.producto_id = p.id
+            LEFT JOIN categorias c ON p.categoria_id = c.id
+            WHERE v.estado = 'Completada' 
+                AND DATE(v.fecha_venta) BETWEEN ? AND ?
+            GROUP BY c.id, c.nombre
+            ORDER BY total_ventas DESC
         `, [fechaInicio, fechaFin]);
         return rows;
     },
@@ -84,6 +179,8 @@ const ReporteModel = {
                 p.precio_compra,
                 p.precio_venta,
                 (p.stock_actual * p.precio_compra) as valor_inventario,
+                (p.stock_actual * p.precio_venta) as valor_venta_potencial,
+                ROUND(((p.precio_venta - p.precio_compra) / p.precio_compra) * 100, 2) as margen_porcentaje,
                 CASE 
                     WHEN p.stock_actual = 0 THEN 'Sin Stock'
                     WHEN p.stock_actual <= p.stock_minimo THEN 'Stock Bajo'

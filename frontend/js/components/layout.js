@@ -271,26 +271,17 @@ function renderDashboard() {
             <div class="dashboard-grid">
                 <div class="stat-card dashboard-panel">
                     <div class="panel-header">
-                        <h3>Ventas últimos 7 días</h3>
-                        <span class="panel-subtitle" id="ventasSemanaTotal">--</span>
-                    </div>
-                    <div id="ventasSemanaChart" class="progress-list"></div>
-                </div>
-                <div class="stat-card dashboard-panel">
-                    <div class="panel-header">
                         <h3>Métodos de pago</h3>
                     </div>
                     <ul class="dashboard-list" id="metodosPagoList"></ul>
                 </div>
-            </div>
-
-            <div class="dashboard-grid">
                 <div class="stat-card dashboard-panel">
                     <div class="panel-header">
                         <h3>Top productos del mes</h3>
                     </div>
                     <ul class="dashboard-list" id="topProductosList"></ul>
                 </div>
+            </div>
                 <div class="stat-card dashboard-panel">
                     <div class="panel-header">
                         <h3>Alertas de stock</h3>
@@ -412,7 +403,6 @@ function renderDashboardData(data) {
         setText('dashboardMonthRange', formatDateRange(data.periodoMes));
     }
 
-    renderVentasSemanal(data.ventasDiarias || []);
     renderMetodosPago(data.metodosPago || []);
     renderTopProductos(data.topProductos || []);
     renderStockCritico(data.stockCritico || []);
@@ -420,38 +410,6 @@ function renderDashboardData(data) {
     renderProximosVencer(data.proximosVencer || []);
     renderCajaResumen(data.cajaActual);
     renderConteosGenerales(data.conteos || {});
-}
-
-function renderVentasSemanal(registros) {
-    const container = document.getElementById('ventasSemanaChart');
-    if (!container) return;
-
-    if (!registros.length) {
-        container.innerHTML = renderEmptyStateInline('Todavía no hay ventas registradas en el periodo.');
-        setText('ventasSemanaTotal', '--');
-        return;
-    }
-
-    const ordenados = [...registros].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-    const maxTotal = Math.max(...ordenados.map(r => Number(r.total_ventas) || 0));
-    const totalSemana = ordenados.reduce((acc, r) => acc + (Number(r.total_ventas) || 0), 0);
-    setText('ventasSemanaTotal', formatCurrency(totalSemana));
-
-    container.innerHTML = ordenados.map(item => {
-        const valor = Number(item.total_ventas) || 0;
-        const width = maxTotal ? (valor / maxTotal) * 100 : 0;
-        return `
-            <div class="progress-row">
-                <div class="progress-info">
-                    <span>${formatDateShort(item.fecha)}</span>
-                    <strong>${formatCurrency(valor)}</strong>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-value" style="width: ${width}%;"></div>
-                </div>
-            </div>
-        `;
-    }).join('');
 }
 
 function renderMetodosPago(items) {

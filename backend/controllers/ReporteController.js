@@ -11,11 +11,15 @@ const ReporteController = {
             const fechaInicio = fecha_inicio || inicioMes.toISOString().split('T')[0];
             const fechaFin = fecha_fin || hoy.toISOString().split('T')[0];
             
-            const [resumen, ventasDiarias, productosMasVendidos, metodosPago] = await Promise.all([
+            const [resumen, ventasDiarias, productosMasVendidos, metodosPago, ventasDetalladas, detalleProductos, ventasPorVendedor, ventasPorCategoria] = await Promise.all([
                 ReporteModel.ventasResumen(fechaInicio, fechaFin),
                 ReporteModel.ventasPorPeriodo(fechaInicio, fechaFin),
-                ReporteModel.productosMasVendidos(fechaInicio, fechaFin, 10),
-                ReporteModel.ventasPorMetodoPago(fechaInicio, fechaFin)
+                ReporteModel.productosMasVendidos(fechaInicio, fechaFin, 20),
+                ReporteModel.ventasPorMetodoPago(fechaInicio, fechaFin),
+                ReporteModel.ventasDetalladas(fechaInicio, fechaFin),
+                ReporteModel.detalleVentasProductos(fechaInicio, fechaFin),
+                ReporteModel.ventasPorVendedor(fechaInicio, fechaFin),
+                ReporteModel.ventasPorCategoria(fechaInicio, fechaFin)
             ]);
             
             res.json({
@@ -26,7 +30,11 @@ const ReporteController = {
                     resumen,
                     ventasDiarias,
                     productosMasVendidos,
-                    metodosPago
+                    metodosPago,
+                    ventasDetalladas,
+                    detalleProductos,
+                    ventasPorVendedor,
+                    ventasPorCategoria
                 }
             });
         } catch (error) {
