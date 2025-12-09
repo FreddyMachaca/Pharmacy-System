@@ -62,7 +62,7 @@ cd installer/license_generator
 python generate_serial.py 8C16459F2AD71A2B
 ```
 
-5. Te mostrará el serial (ej: `FARM-BOL-2025-1A2B-3C4D-5E6F`)
+5. Te mostrará el serial (ej: `A7B2-C9D1-E4F3-8G6H-2K5L`)
 6. Envías ese serial al cliente
 7. El cliente lo ingresa y activa su licencia
 

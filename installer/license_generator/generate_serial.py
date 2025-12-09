@@ -11,10 +11,12 @@ def generate_serial(hwid):
     parts = [
         hash_hex[0:4].upper(),
         hash_hex[4:8].upper(),
-        hash_hex[8:12].upper()
+        hash_hex[8:12].upper(),
+        hash_hex[12:16].upper(),
+        hash_hex[16:20].upper()
     ]
     
-    serial = f"FARM-BOL-2025-{parts[0]}-{parts[1]}-{parts[2]}"
+    serial = f"{parts[0]}-{parts[1]}-{parts[2]}-{parts[3]}-{parts[4]}"
     return serial
 
 def main():
